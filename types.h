@@ -1,9 +1,9 @@
 /*! \file
     \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
     \copyright (c) 2026 Alexander Martynov
-    \brief Types for marty_cbp
+    \brief Types for marty_cdt
 
-    Repository: https://github.com/al-martyn1/marty_cbp
+    Repository: https://github.com/al-martyn1/marty_cdt
  */
 
 #pragma once
@@ -28,7 +28,7 @@
 
 
 //--------------------------------------------------------------------------------------------------------------------
-// #include "marty_cbp/cbp/types.h"
+// #include "marty_cdt/types.h"
 // marty::chrome_devtools_protocol::
 // marty::cdp::
 
@@ -83,7 +83,7 @@ namespace cdp = chrome_devtools_protocol;
 
 } // namespace marty
 
-// #include "marty_cbp/types.h"
+// #include "marty_cdt/types.h"
 // marty::chrome_devtools_protocol::
 // marty::cdp::
 

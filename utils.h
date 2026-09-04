@@ -1,9 +1,9 @@
 /*! \file
     \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
     \copyright (c) 2026 Alexander Martynov
-    \brief Utils for marty_cbp
+    \brief Utils for marty_cdt
 
-    Repository: https://github.com/al-martyn1/marty_cbp
+    Repository: https://github.com/al-martyn1/marty_cdt
  */
 
 #pragma once
@@ -14,7 +14,7 @@
 #include "umba/filename.h"
 #include "umba/filesys.h"
 #include "umba/shellapi.h"
-#include "umba/sleep.h"
+// #include "umba/sleep.h"
 //
 #include "marty_url/percent_encoding.h"
 //
@@ -23,21 +23,76 @@
 #include <ixwebsocket/IXHttpClient.h>
 
 //
+#include <chrono>
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <thread>
 
 //--------------------------------------------------------------------------------------------------------------------
 
 
 
 //--------------------------------------------------------------------------------------------------------------------
-// #include "marty_cbp/utils.h"
+// #include "marty_cdt/utils.h"
 // marty::chrome_devtools_protocol::utils::
 // marty::cdp::utils::
 
 namespace marty {
 namespace chrome_devtools_protocol {
 namespace utils {
+
+//--------------------------------------------------------------------------------------------------------------------
+
+
+
+//--------------------------------------------------------------------------------------------------------------------
+inline
+std::vector<std::string> generatePatterns(const std::string& input, char delimiter = '.')
+{
+    if (input.empty())
+    {
+        return {"*"};
+    }
+
+    // Разбиваем строку на части
+    std::vector<std::string> parts;
+    size_t start = 0;
+    size_t end = input.find(delimiter);
+    while (end != std::string::npos)
+    {
+        parts.push_back(input.substr(start, end - start));
+        start = end + 1;
+        end = input.find(delimiter, start);
+    }
+    parts.push_back(input.substr(start));
+
+    std::vector<std::string> result;
+    result.reserve(parts.size() + 1);
+
+    // Полная строка (оригинал)
+    result.push_back(input);
+
+    // Добавляем шаблоны с заменой суффикса на '*'
+    // Идём от большего числа частей к меньшему
+    for (size_t i = parts.size(); i > 1; --i)
+    {
+        std::string prefix;
+        for (size_t j = 0; j < i - 1; ++j)
+        {
+            if (j > 0) prefix += delimiter;
+            prefix += parts[j];
+        }
+        prefix += delimiter;
+        prefix += '*';
+        result.push_back(prefix);
+    }
+
+    // Завершающий шаблон — просто "*"
+    result.push_back("*");
+
+    return result;
+}
 
 //--------------------------------------------------------------------------------------------------------------------
 
@@ -154,8 +209,11 @@ std::vector<std::string> generateArgsForSpawnChromeExactDirs( const std::string 
 
     std::vector<std::string> argsVec;
 
+    std::string schemeSepLocalhostPort = "://localhost:" + to_string(port);
+
     argsVec.push_back("--new-window"); // "--new-tab"
     argsVec.push_back("--remote-debugging-port=" + to_string(port));
+    argsVec.push_back("--remote-allow-origins=http" + schemeSepLocalhostPort + ",ws" + schemeSepLocalhostPort + ",wss" + schemeSepLocalhostPort);
     argsVec.push_back("--user-data-dir="  + userDataDir);
     argsVec.push_back("--disk-cache-dir=" + diskCacheDir);
     //argsVec.push_back("" + );
@@ -211,7 +269,6 @@ std::vector<std::string> generateArgsForSpawnChrome( const std::string &projectP
 //     Invalid               = 100
 // };
 
-
 inline
 std::string ixHttpErrorCodeToString(ix::HttpErrorCode c)
 {
@@ -237,6 +294,38 @@ std::string ixHttpErrorCodeToString(ix::HttpErrorCode c)
         default: return "<UNKNOWN>";
     }
 }
+
+//--------------------------------------------------------------------------------------------------------------------
+// enum class WebSocketMessageType
+// {
+//     Message  = 0,
+//     Open     = 1,
+//     Close    = 2,
+//     Error    = 3,
+//     Ping     = 4,
+//     Pong     = 5,
+//     Fragment = 6
+// };
+
+inline
+std::string ixWebSocketMessageTypeToString(ix::WebSocketMessageType t)
+{
+    switch(t)
+    {
+        case ix::WebSocketMessageType::Message  : return "Message";
+        case ix::WebSocketMessageType::Open     : return "Open";
+        case ix::WebSocketMessageType::Close    : return "Close";
+        case ix::WebSocketMessageType::Error    : return "Error";
+        case ix::WebSocketMessageType::Ping     : return "Ping";
+        case ix::WebSocketMessageType::Pong     : return "Pong";
+        case ix::WebSocketMessageType::Fragment : return "Fragment";
+        default: return "<UNKNOWN>";
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------
+
+
+
 
 //--------------------------------------------------------------------------------------------------------------------
 inline
@@ -298,26 +387,19 @@ ix::HttpRequestArgsPtr ixHttpRequestArgsSetTimeouts(ix::HttpRequestArgsPtr pArgs
 
 //--------------------------------------------------------------------------------------------------------------------
 inline
-ix::HttpRequestArgsPtr makeRequestArgs(const std::string& url, Timeouts timeouts)
+ix::HttpRequestArgsPtr makeRequestArgs(const std::string& url, Timeouts timeouts=Timeouts{-1,-1})
 {
     ix::HttpClient httpClient;
     return ixHttpRequestArgsSetTimeouts(httpClient.createRequest(url), timeouts);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
-inline
-ix::HttpRequestArgsPtr makeRequestArgs(const std::string& url)
-{
-    return makeRequestArgs(url, Timeouts{-1,-1});
-}
-
-//--------------------------------------------------------------------------------------------------------------------
 
 
 
 //--------------------------------------------------------------------------------------------------------------------
 inline
-ix::HttpResponsePtr httpGet(ix::HttpRequestArgsPtr pArgs, Timeouts timeouts)
+ix::HttpResponsePtr httpGet(ix::HttpRequestArgsPtr pArgs, Timeouts timeouts=Timeouts{-1,-1})
 {
     ix::HttpClient httpClient;
     ixHttpRequestArgsSetTimeouts(pArgs, timeouts);
@@ -326,14 +408,7 @@ ix::HttpResponsePtr httpGet(ix::HttpRequestArgsPtr pArgs, Timeouts timeouts)
 
 //--------------------------------------------------------------------------------------------------------------------
 inline
-ix::HttpResponsePtr httpGet(ix::HttpRequestArgsPtr pArgs)
-{
-    return httpGet(pArgs, Timeouts{-1,-1});
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-inline
-ix::HttpResponsePtr httpGet(const std::string& url, Timeouts timeouts)
+ix::HttpResponsePtr httpGet(const std::string& url, Timeouts timeouts=Timeouts{-1,-1})
 {
     auto pArgs = makeRequestArgs(url, timeouts);
     ix::HttpClient httpClient;
@@ -341,19 +416,12 @@ ix::HttpResponsePtr httpGet(const std::string& url, Timeouts timeouts)
 }
 
 //--------------------------------------------------------------------------------------------------------------------
-inline
-ix::HttpResponsePtr httpGet(const std::string& url)
-{
-    return httpGet(url, Timeouts{-1,-1});
-}
-
-//--------------------------------------------------------------------------------------------------------------------
 
 
 
 //--------------------------------------------------------------------------------------------------------------------
 inline
-ix::HttpResponsePtr httpPut(ix::HttpRequestArgsPtr pArgs, const std::string body, Timeouts timeouts)
+ix::HttpResponsePtr httpPut(ix::HttpRequestArgsPtr pArgs, const std::string body=std::string(), Timeouts timeouts=Timeouts{-1,-1})
 {
     ix::HttpClient httpClient;
     ixHttpRequestArgsSetTimeouts(pArgs, timeouts);
@@ -362,9 +430,9 @@ ix::HttpResponsePtr httpPut(ix::HttpRequestArgsPtr pArgs, const std::string body
 
 //--------------------------------------------------------------------------------------------------------------------
 inline
-ix::HttpResponsePtr httpPut(ix::HttpRequestArgsPtr pArgs, const std::string body=std::string())
+ix::HttpResponsePtr httpPut(ix::HttpRequestArgsPtr pArgs, Timeouts timeouts)
 {
-    return httpPut(pArgs, body, Timeouts{-1,-1});
+    return httpPut(pArgs, std::string(), timeouts);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -373,7 +441,7 @@ ix::HttpResponsePtr httpPut(ix::HttpRequestArgsPtr pArgs, const std::string body
 
 //--------------------------------------------------------------------------------------------------------------------
 inline
-ix::HttpResponsePtr httpGetJsonList(const std::string &httpBaseUrl, Timeouts timeouts)
+ix::HttpResponsePtr httpGetJsonList(const std::string &httpBaseUrl, Timeouts timeouts=Timeouts{-1,-1})
 {
     auto jsonListUrl = httpBaseUrl + "/json/list";
     return httpGet(jsonListUrl, timeouts);
@@ -381,18 +449,13 @@ ix::HttpResponsePtr httpGetJsonList(const std::string &httpBaseUrl, Timeouts tim
 
 //--------------------------------------------------------------------------------------------------------------------
 inline
-ix::HttpResponsePtr httpGetJsonList(const std::string &httpBaseUrl)
-{
-    return httpGetJsonList(httpBaseUrl, Timeouts{-1,-1});
-}
-
-//--------------------------------------------------------------------------------------------------------------------
-inline
 ix::HttpResponsePtr runConnectAndGetJsonList( const std::string              &httpBaseUrl // + "/json/list";
                                             , const std::string              &chromeName  // "chrome"
                                             , const std::vector<std::string> &spawnArgs
-                                            , Timeouts                        probeTimeouts
-                                            , Timeouts                        connectTimeouts
+                                            , Timeouts                       probeTimeouts
+                                            , Timeouts                       connectTimeouts
+                                            , std::size_t                    nConnectTryMax=10
+                                            , unsigned                       connectSleepMsTimeout=10
                                             )
 {
     //auto jsonListUrl = httpBaseUrl + "/json/list";
@@ -409,6 +472,9 @@ ix::HttpResponsePtr runConnectAndGetJsonList( const std::string              &ht
 
     if (foundExes.empty())
         return response;
+
+    if (!nConnectTryMax)
+        nConnectTryMax = 10;
 
     for(auto chromeExeFullName : foundExes)
     {
@@ -430,7 +496,12 @@ ix::HttpResponsePtr runConnectAndGetJsonList( const std::string              &ht
 
             ++nConnectTry;
 
-        } while(nConnectTry<=10);
+            std::this_thread::sleep_for(std::chrono::milliseconds(connectSleepMsTimeout));
+            // umba::sleepMs(connectSleepMsTimeout);
+
+            connectSleepMsTimeout *= 2;
+
+        } while(nConnectTry!=nConnectTryMax);
     
     }
 
@@ -443,39 +514,33 @@ ix::HttpResponsePtr runConnectAndGetJsonList( const std::string              &ht
 
 //--------------------------------------------------------------------------------------------------------------------
 inline
-ix::HttpResponsePtr httpGetJsonVersion(const std::string &httpBaseUrl, Timeouts timeouts)
+ix::HttpResponsePtr httpGetJsonVersion(const std::string &httpBaseUrl, Timeouts timeouts=Timeouts{-1,-1})
 {
     auto jsonListUrl = httpBaseUrl + "/json/version";
     return httpGet(jsonListUrl, timeouts);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
-inline
-ix::HttpResponsePtr httpGetJsonVersion(const std::string &httpBaseUrl)
-{
-    return httpGetJsonVersion(httpBaseUrl, Timeouts{-1,-1});
-}
-
-//--------------------------------------------------------------------------------------------------------------------
 
 
 
 //--------------------------------------------------------------------------------------------------------------------
 inline
-ix::HttpResponsePtr httpPutJsonNewPage(const std::string &httpBaseUrl, const std::string &newPageUrl, Timeouts timeouts)
+ix::HttpResponsePtr httpPutJsonNewPage(const std::string &httpBaseUrl, const std::string &newPageUrl, Timeouts timeouts=Timeouts{-1,-1})
 {
     auto jsonNewPageUrl = httpBaseUrl + "/json/new";
-    jsonNewPageUrl += "?" + marty::url::urlEncodeComponent(newPageUrl);
-    //ix::HttpRequestArgsPtr 
+    if (!newPageUrl.empty())
+        jsonNewPageUrl += "?" + marty::url::urlEncodeComponent(newPageUrl);
+
     auto pArgs = makeRequestArgs(jsonNewPageUrl, timeouts);
     return httpPut(pArgs);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
 inline
-ix::HttpResponsePtr httpPutJsonNewPage(const std::string &httpBaseUrl, const std::string &newPageUrl)
+ix::HttpResponsePtr httpPutJsonNewPage(const std::string &httpBaseUrl, Timeouts timeouts=Timeouts{-1,-1})
 {
-    return httpPutJsonNewPage(httpBaseUrl, newPageUrl, Timeouts{-1,-1});
+    return httpPutJsonNewPage(httpBaseUrl, std::string(), timeouts);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -487,7 +552,7 @@ inline
 ix::HttpResponsePtr httpClosePage(const std::string &httpBaseUrl, const std::string &pageId, Timeouts timeouts)
 {
     auto jsonClosePageUrl = httpBaseUrl + "/json/close/";
-    jsonClosePageUrl += pageId; // marty::url::urlEncodeComponent(newPageUrl);
+    jsonClosePageUrl += marty::url::urlEncodeComponent(pageId);
     auto pArgs = makeRequestArgs(jsonClosePageUrl, timeouts);
 
     ix::HttpClient httpClient;
@@ -514,12 +579,12 @@ inline
 ix::HttpResponsePtr httpActivatePage(const std::string &httpBaseUrl, const std::string &pageId, Timeouts timeouts)
 {
     auto jsonClosePageUrl = httpBaseUrl + "/json/activate/";
-    jsonClosePageUrl += pageId; // marty::url::urlEncodeComponent(newPageUrl);
+    jsonClosePageUrl += marty::url::urlEncodeComponent(pageId);
     auto pArgs = makeRequestArgs(jsonClosePageUrl, timeouts);
 
     ix::HttpClient httpClient;
     return httpClient.request( pArgs->url
-                             , ix::HttpClient::kDelete
+                             , ix::HttpClient::kGet
                              , ""
                              , pArgs
                              );
@@ -536,7 +601,198 @@ ix::HttpResponsePtr httpActivatePage(const std::string &httpBaseUrl, const std::
 
 
 
+
 //--------------------------------------------------------------------------------------------------------------------
+// ix::WebSocketInitResult
+//   bool success;
+//   int http_status;
+//   std::string errorStr;
+//   WebSocketHttpHeaders headers;
+//   std::string uri;
+//   std::string protocol;
+inline
+ix::WebSocketInitResult wsConnect(ix::WebSocket& webSocket, const std::string& url, int timeoutSec = 3)
+{
+    webSocket.setUrl(url);
+    return webSocket.connect(timeoutSec);
+}
+
+inline
+ix::WebSocketInitResult wsConnect(ix::WebSocket& webSocket, const std::string& url, std::function<void(const ix::WebSocketMessagePtr&)> msgCallback, int timeoutSec = 3)
+{
+    webSocket.setUrl(url);
+    webSocket.setOnMessageCallback(msgCallback);
+    return webSocket.connect(timeoutSec);
+}
+
+// void setOnMessageCallback(const OnMessageCallback& callback);
+// static void setTrafficTrackerCallback(const OnTrafficTrackerCallback& callback);
+// using OnMessageCallback = std::function<void(const WebSocketMessagePtr&)>;
+// using OnTrafficTrackerCallback = std::function<void(size_t size, bool incoming)>;
+
+//--------------------------------------------------------------------------------------------------------------------
+
+
+
+//--------------------------------------------------------------------------------------------------------------------
+// namespace ix
+// {
+//     struct WebSocketSendInfo
+//     {
+//         bool success;
+//         bool compressionError;
+//         size_t payloadSize;
+//         size_t wireSize;
+
+        // WebSocketSendInfo send(const std::string& data,
+        //                        bool binary = false,
+        //                        const OnProgressCallback& onProgressCallback = nullptr);
+        // WebSocketSendInfo sendBinary(const std::string& data,
+        //                              const OnProgressCallback& onProgressCallback = nullptr);
+        // WebSocketSendInfo sendBinary(const IXWebSocketSendData& data,
+        //                              const OnProgressCallback& onProgressCallback = nullptr);
+        // // does not check for valid UTF-8 characters. Caller must check that.
+        // WebSocketSendInfo sendUtf8Text(const std::string& text,
+        //                                const OnProgressCallback& onProgressCallback = nullptr);
+        // // does not check for valid UTF-8 characters. Caller must check that.
+        // WebSocketSendInfo sendUtf8Text(const IXWebSocketSendData& text,
+        //                                const OnProgressCallback& onProgressCallback = nullptr);
+        // WebSocketSendInfo sendText(const std::string& text,
+        //                            const OnProgressCallback& onProgressCallback = nullptr);
+
+// https://chromedevtools.github.io/devtools-protocol/
+//--------------------------------------------------------------------------------------------------------------------
+// Domains
+//  
+// E Accessibility Domain         - https://chromedevtools.github.io/devtools-protocol/tot/Accessibility/
+// E Animation Domain             - https://chromedevtools.github.io/devtools-protocol/tot/Animation/
+// E Audits Domain                - https://chromedevtools.github.io/devtools-protocol/tot/Audits/
+// E Autofill Domain              - https://chromedevtools.github.io/devtools-protocol/tot/Autofill/
+// E BackgroundService Domain     - https://chromedevtools.github.io/devtools-protocol/tot/BackgroundService/
+// E BluetoothEmulation Domain    - https://chromedevtools.github.io/devtools-protocol/tot/BluetoothEmulation/
+//   Browser Domain               - https://chromedevtools.github.io/devtools-protocol/tot/Browser/
+// E CacheStorage Domain          - https://chromedevtools.github.io/devtools-protocol/tot/CacheStorage/
+// E Cast Domain                  - https://chromedevtools.github.io/devtools-protocol/tot/Cast/
+// D Console Domain               - https://chromedevtools.github.io/devtools-protocol/tot/Console/
+// E CrashReportContext Domain    - https://chromedevtools.github.io/devtools-protocol/tot/CrashReportContext/
+// E CSS Domain                   - https://chromedevtools.github.io/devtools-protocol/tot/CSS/
+//   Debugger Domain              - https://chromedevtools.github.io/devtools-protocol/tot/Debugger/
+// E DeviceAccess Domain          - https://chromedevtools.github.io/devtools-protocol/tot/DeviceAccess/
+// E DeviceOrientation Domain     - https://chromedevtools.github.io/devtools-protocol/tot/DeviceOrientation/
+//   DOM Domain                   - https://chromedevtools.github.io/devtools-protocol/tot/DOM/
+//   DOMDebugger Domain           - https://chromedevtools.github.io/devtools-protocol/tot/DOMDebugger/
+// E DOMSnapshot Domain           - https://chromedevtools.github.io/devtools-protocol/tot/DOMSnapshot/
+// E DOMStorage Domain            - https://chromedevtools.github.io/devtools-protocol/tot/DOMStorage/
+// E DOMStorage Domain            - https://chromedevtools.github.io/devtools-protocol/tot/DOMStorage/
+//   Emulation Domain             - https://chromedevtools.github.io/devtools-protocol/tot/Emulation/
+// E EventBreakpoints Domain      - https://chromedevtools.github.io/devtools-protocol/tot/EventBreakpoints/
+// E Extensions Domain            - https://chromedevtools.github.io/devtools-protocol/tot/Extensions/
+// E FedCm Domain                 - https://chromedevtools.github.io/devtools-protocol/tot/FedCm/
+//   Fetch Domain                 - https://chromedevtools.github.io/devtools-protocol/tot/Fetch/
+// E FileSystem Domain            - https://chromedevtools.github.io/devtools-protocol/tot/FileSystem/
+// E HeadlessExperimental Domain  - https://chromedevtools.github.io/devtools-protocol/tot/HeadlessExperimental/
+// E HeapProfiler Domain          - https://chromedevtools.github.io/devtools-protocol/tot/HeapProfiler/
+// E IndexedDB Domain             - https://chromedevtools.github.io/devtools-protocol/tot/IndexedDB/
+//   Input Domain                 - https://chromedevtools.github.io/devtools-protocol/tot/Input/
+// E Inspector Domain             - https://chromedevtools.github.io/devtools-protocol/tot/Inspector/
+//   IO Domain                    - https://chromedevtools.github.io/devtools-protocol/tot/IO/
+// E LayerTree Domain             - https://chromedevtools.github.io/devtools-protocol/tot/LayerTree/
+//   Log Domain                   - https://chromedevtools.github.io/devtools-protocol/tot/Log/
+// E Media Domain                 - https://chromedevtools.github.io/devtools-protocol/tot/Media/
+// E Memory Domain                - https://chromedevtools.github.io/devtools-protocol/tot/Memory/
+//   Network Domain               - https://chromedevtools.github.io/devtools-protocol/tot/Network/
+// E Overlay Domain               - https://chromedevtools.github.io/devtools-protocol/tot/Overlay/
+//   Page Domain                  - https://chromedevtools.github.io/devtools-protocol/tot/Page/
+//   Performance Domain           - https://chromedevtools.github.io/devtools-protocol/tot/Performance/
+// E PerformanceTimeline Domain   - https://chromedevtools.github.io/devtools-protocol/tot/PerformanceTimeline/
+// E Preload Domain               - https://chromedevtools.github.io/devtools-protocol/tot/Preload/
+//   Profiler Domain              - https://chromedevtools.github.io/devtools-protocol/tot/Profiler/
+// E PWA Domain                   - https://chromedevtools.github.io/devtools-protocol/tot/PWA/
+//   Runtime Domain               - https://chromedevtools.github.io/devtools-protocol/tot/Runtime/
+// D Schema Domain                - https://chromedevtools.github.io/devtools-protocol/tot/Schema/
+//   Security Domain              - https://chromedevtools.github.io/devtools-protocol/tot/Security/
+// E ServiceWorker Domain         - https://chromedevtools.github.io/devtools-protocol/tot/ServiceWorker/
+// E SmartCardEmulation Domain    - https://chromedevtools.github.io/devtools-protocol/tot/SmartCardEmulation/
+// E Storage Domain               - https://chromedevtools.github.io/devtools-protocol/tot/Storage/
+// E SystemInfo Domain            - https://chromedevtools.github.io/devtools-protocol/tot/SystemInfo/
+//   Target Domain                - https://chromedevtools.github.io/devtools-protocol/tot/Target/
+// E Tethering Domain             - https://chromedevtools.github.io/devtools-protocol/tot/Tethering/
+//   Tracing Domain               - https://chromedevtools.github.io/devtools-protocol/tot/Tracing/
+// E WebAudio Domain              - https://chromedevtools.github.io/devtools-protocol/tot/WebAudio/
+// E WebAuthn Domain              - https://chromedevtools.github.io/devtools-protocol/tot/WebAuthn/
+// E WebMCP Domain                - https://chromedevtools.github.io/devtools-protocol/tot/WebMCP/
+
+// Домен    Основные события
+// Page     Page.domContentEventFired — DOM готов
+//          Page.loadEventFired — страница загружена
+//          Page.frameNavigated — началась навигация
+// Network  Network.requestWillBeSent — запрос отправлен
+//          Network.responseReceived — ответ получен
+// Runtime  Runtime.consoleAPICalled — вызов console.log
+//          Runtime.exceptionThrown — необработанное исключение
+// DOM      DOM.documentUpdated — DOM обновлён
+//          DOM.attributeModified — атрибут изменён
+
+// Полный JSON-файл со схемой всех доменов, команд и событий через HTTP-эндпоинт: curl http://localhost:9810/json/protocol
+
+//--------------------------------------------------------------------------------------------------------------------
+inline
+ix::WebSocketSendInfo wsSendEventSubscription(ix::WebSocket& webSocket, unsigned cmdId, const std::string &subscriptionName)
+{
+    json j = { {"id", cmdId}
+             , {"method", subscriptionName}
+             };
+    return webSocket.sendText(j.dump());
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+inline
+ix::WebSocketSendInfo wsSendCommand(ix::WebSocket& webSocket, unsigned cmdId, const std::string &method, json params)
+{
+    json j = { {"id", cmdId}
+             , {"method", method}
+             //  {"params", {{"url", "https://example.com"}}}
+             };
+
+    if (!params.is_null())
+        j["params"] = params;
+
+    return webSocket.sendText(j.dump());
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+// Browser.getWindowForTarget
+// Browser.setWindowBounds
+//  
+// {
+//   "id": 1,
+//   "method": "Browser.getWindowForTarget"
+// }
+//  
+// {
+//   "id": 1,
+//   "result": {
+//     "windowId": 12345,
+//     "bounds": { "left": 0, "top": 0, "width": 1280, "height": 720, "windowState": "normal" }
+//   }
+// }
+//  
+// {
+//   "id": 2,
+//   "method": "Browser.setWindowBounds",
+//   "params": {
+//     "windowId": 12345,
+//     "bounds": {
+//       "width": 1024,
+//       "height": 768,
+//       "windowState": "normal" // или "maximized", "minimized", "fullscreen"
+//     }
+//   }
+// }
+
+
+
+
 
 } // namespace utils
 } // namespace chrome_devtools_protocol
@@ -545,7 +801,7 @@ namespace cdp = chrome_devtools_protocol;
 
 } // namespace marty
 
-// #include "marty_cbp/utils.h"
+// #include "marty_cdt/utils.h"
 // marty::chrome_devtools_protocol::utils::
 // marty::cdp::utils::
 

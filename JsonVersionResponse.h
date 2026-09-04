@@ -3,7 +3,7 @@
     \copyright (c) 2026 Alexander Martynov
     \brief JsonVersionResponse
 
-    Repository: https://github.com/al-martyn1/marty_cbp
+    Repository: https://github.com/al-martyn1/marty_cdt
  */
 
 #pragma once
@@ -20,7 +20,7 @@
 
 
 //--------------------------------------------------------------------------------------------------------------------
-// #include "marty_cbp/JsonVersionResponse.h"
+// #include "marty_cdt/JsonVersionResponse.h"
 // marty::chrome_devtools_protocol::
 // marty::cdp::
 
@@ -50,6 +50,7 @@ struct JsonVersionResponse
         userAgent.clear();
         v8Version.clear();
         webkitVersion.clear();
+        debuggerVersion.clear();
 
         webSocketDebuggerUrl.clear();
     }
@@ -98,22 +99,22 @@ struct JsonVersionResponse
     
         clear();
 
-        // if (j.contains("Browser"))
+        if (j.contains("Browser"))
             browser = j["Browser"].get<std::string>();
 
-        // if (j.contains("Protocol-Version"))
+        if (j.contains("Protocol-Version"))
             protocolVersion = j["Protocol-Version"].get<std::string>();
 
-        // if (j.contains("User-Agent"))
+        if (j.contains("User-Agent"))
             userAgent = j["User-Agent"].get<std::string>();
 
-        // if (j.contains("V8-Version"))
+        if (j.contains("V8-Version"))
             v8Version = j["V8-Version"].get<std::string>();
 
-        // if (j.contains("WebKit-Version"))
+        if (j.contains("WebKit-Version"))
             webkitVersion = j["WebKit-Version"].get<std::string>();
 
-        // if (j.contains("webSocketDebuggerUrl"))
+        if (j.contains("webSocketDebuggerUrl"))
             webSocketDebuggerUrl = j["webSocketDebuggerUrl"].get<std::string>();
 
         if (j.contains("Debugger-Version"))
@@ -148,6 +149,6 @@ namespace cdp = chrome_devtools_protocol;
 
 } // namespace marty
 
-// #include "marty_cbp/JsonVersionResponse.h"
+// #include "marty_cdt/JsonVersionResponse.h"
 // marty::chrome_devtools_protocol::
 // marty::cdp::

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(marty_cbp CXX)
+project(marty_cdt CXX)
 
 if(NOT DEFINED CMAKE_BUILD_TYPE AND NOT DEFINED CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
@@ -22,5 +22,5 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX "Header Files" FILES ${head
 
 add_library(${PROJECT_NAME} ${sources} ${headers})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${IXWEBSOCKET_LIBS})
-add_library(marty::cbp ALIAS ${PROJECT_NAME})
+add_library(marty::cdt ALIAS ${PROJECT_NAME})
 

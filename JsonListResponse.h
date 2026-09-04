@@ -3,7 +3,7 @@
     \copyright (c) 2026 Alexander Martynov
     \brief JsonListResponseEntry
 
-    Repository: https://github.com/al-martyn1/marty_cbp
+    Repository: https://github.com/al-martyn1/marty_cdt
  */
 
 #pragma once
@@ -20,7 +20,7 @@
 
 
 //--------------------------------------------------------------------------------------------------------------------
-// #include "marty_cbp/JsonListResponseEntry.h"
+// #include "marty_cdt/JsonListResponseEntry.h"
 // marty::chrome_devtools_protocol::
 // marty::cdp::
 
@@ -104,6 +104,6 @@ namespace cdp = chrome_devtools_protocol;
 
 } // namespace marty
 
-// #include "marty_cbp/JsonListResponseEntry.h"
+// #include "marty_cdt/JsonListResponseEntry.h"
 // marty::chrome_devtools_protocol::
 // marty::cdp::
