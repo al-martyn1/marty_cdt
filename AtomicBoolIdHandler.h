@@ -22,6 +22,7 @@
 #include <atomic>
 #include <string>
 #include <vector>
+#include <iostream>
 
 //--------------------------------------------------------------------------------------------------------------------
 
@@ -43,8 +44,9 @@ namespace chrome_devtools_protocol {
 struct AtomicBoolIdHandler
 {
     std::atomic<bool>   &atomicBool;
+    bool                printInfo = false;
 
-    void operator()(marty::cdt::Connection */* pCon */, const marty::cdt::WebSocketMessage& /* msg */, marty::cdt::MessageIdVariant idVariant, marty::cdt::json j)
+    void operator()(marty::cdt::Connection *pCon, const marty::cdt::WebSocketMessage& /* msg */, marty::cdt::MessageIdVariant idVariant, marty::cdt::json j)
     {
         //try
         //{
@@ -54,11 +56,29 @@ struct AtomicBoolIdHandler
             MARTY_CDT_USED(id);
 
             atomicBool = true;
+
+            MARTY_CDT_USED(j);
+            if (printInfo)
+            {
+                std::cout << "timestamp: " << pCon->getTimestamp() << "\n";
+                std::cout << "AtomicBoolIdHandler, ID: " << id << "\n";
+                std::cout << j.dump(2) << "\n\n";
+            }
      
         //}
         //catch(...)
         //{}
     }
+    
+    AtomicBoolIdHandler() = delete;
+    AtomicBoolIdHandler(std::atomic<bool> &ab) : atomicBool(ab) {}
+    AtomicBoolIdHandler(std::atomic<bool> &ab, bool p) : atomicBool(ab), printInfo(p) {}
+
+    AtomicBoolIdHandler(const AtomicBoolIdHandler &) = default;
+    AtomicBoolIdHandler& operator=(const AtomicBoolIdHandler &) = default;
+
+    AtomicBoolIdHandler(AtomicBoolIdHandler &&) = default;
+    AtomicBoolIdHandler& operator=(AtomicBoolIdHandler &) = default;
 
 }; // struct AtomicBoolIdHandler
 

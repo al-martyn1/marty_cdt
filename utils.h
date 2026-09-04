@@ -23,6 +23,7 @@
 #include <ixwebsocket/IXHttpClient.h>
 
 //
+#include <cstdint>
 #include <chrono>
 #include <string>
 #include <vector>
@@ -41,6 +42,18 @@
 namespace marty {
 namespace chrome_devtools_protocol {
 namespace utils {
+
+//--------------------------------------------------------------------------------------------------------------------
+
+
+
+//--------------------------------------------------------------------------------------------------------------------
+inline
+time_point_type getSteadyClockNow()
+{
+    return std::chrono::steady_clock::now();
+    // std::chrono::duration_cast<std::chrono::milliseconds>();
+}
 
 //--------------------------------------------------------------------------------------------------------------------
 

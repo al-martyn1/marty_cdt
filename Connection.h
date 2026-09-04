@@ -73,6 +73,8 @@ class Connection
 
     std::atomic_uint      m_wsStartCounter = 0;
 
+    time_point_type       m_connectTimestamp; // = 0;
+
 //--------------------------------------------------------------------------------------------------------------------
 public:
 
@@ -654,6 +656,15 @@ public:
  
 
     //--------------------------------------------------
+    // Since wsStart moment
+    std::uint64_t getTimestamp() const
+    {
+        return (std::uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(utils::getSteadyClockNow() - m_connectTimestamp).count();
+        //return std::chrono::milliseconds(utils::getSteadyClockNow() - m_connectTimestamp);
+        //return utils::getSteadyClockNow() - m_connectTimestamp;
+    }
+
+    //--------------------------------------------------
     void wsStart()
     {
         
@@ -668,7 +679,10 @@ public:
 
         unsigned expected = 0;
         if (m_wsStartCounter.compare_exchange_strong(expected, 1))
+        {
             m_webSocket.start();
+            m_connectTimestamp = utils::getSteadyClockNow();
+        }
     }
  
     void wsStop()
@@ -707,7 +721,7 @@ public:
     bool wsWaitAndDispatchMessages(unsigned timeoutMs, const std::atomic<bool> &waitFor)
     {
         auto timeout = std::chrono::milliseconds(timeoutMs);
-        auto start   = std::chrono::steady_clock::now();
+        auto start   = std::chrono::steady_clock::now(); // utils::getSteadyClockNow(); // std::chrono::steady_clock::now();
         auto now     = start;
 
         do
@@ -719,7 +733,7 @@ public:
 
             std::this_thread::yield();
 
-            now = std::chrono::steady_clock::now();
+            now = std::chrono::steady_clock::now(); // utils::getSteadyClockNow(); // std::chrono::steady_clock::now();
         }
         while(std::chrono::duration_cast<std::chrono::milliseconds>(now - start) < timeout);
 
@@ -750,7 +764,7 @@ public:
 
         auto sleepPeriod = std::chrono::milliseconds(sleepPeriodMs);
         auto timeout     = std::chrono::milliseconds(timeoutMs);
-        auto start       = std::chrono::steady_clock::now();
+        auto start       = std::chrono::steady_clock::now(); // utils::getSteadyClockNow(); // std::chrono::steady_clock::now();
         auto now         = start;
 
         do
@@ -762,7 +776,7 @@ public:
 
             std::this_thread::sleep_for(sleepPeriod);
 
-            now = std::chrono::steady_clock::now();
+            now = std::chrono::steady_clock::now(); // utils::getSteadyClockNow(); // std::chrono::steady_clock::now();
         }
         while(std::chrono::duration_cast<std::chrono::milliseconds>(now - start) < timeout);
 
@@ -795,7 +809,7 @@ public:
     bool wsWaitAndDispatchMessages(unsigned timeoutMs, EventFiredCheckHandler eventFiredCheckHandler)
     {
         auto timeout = std::chrono::milliseconds(timeoutMs);
-        auto start   = std::chrono::steady_clock::now();
+        auto start   = std::chrono::steady_clock::now(); // utils::getSteadyClockNow(); // std::chrono::steady_clock::now();
         auto now     = start;
 
         do
@@ -807,7 +821,7 @@ public:
 
             std::this_thread::yield();
 
-            now = std::chrono::steady_clock::now();
+            now = std::chrono::steady_clock::now(); // utils::getSteadyClockNow(); // std::chrono::steady_clock::now();
         }
         while(std::chrono::duration_cast<std::chrono::milliseconds>(now - start) < timeout);
 
@@ -839,7 +853,7 @@ public:
 
         auto sleepPeriod = std::chrono::milliseconds(sleepPeriodMs);
         auto timeout     = std::chrono::milliseconds(timeoutMs);
-        auto start       = std::chrono::steady_clock::now();
+        auto start       = std::chrono::steady_clock::now(); // utils::getSteadyClockNow(); // std::chrono::steady_clock::now();
         auto now         = start;
 
         do
@@ -851,7 +865,7 @@ public:
 
             std::this_thread::sleep_for(sleepPeriod);
 
-            now = std::chrono::steady_clock::now();
+            now = std::chrono::steady_clock::now(); // utils::getSteadyClockNow(); // std::chrono::steady_clock::now();
         }
         while(std::chrono::duration_cast<std::chrono::milliseconds>(now - start) < timeout);
 

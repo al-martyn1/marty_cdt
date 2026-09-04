@@ -20,6 +20,7 @@
 #include <nlohmann/json.hpp>
 
 //
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -37,6 +38,9 @@ namespace chrome_devtools_protocol {
 
 //----------------------------------------------------------------------------
 using json = nlohmann::json;
+
+//----------------------------------------------------------------------------
+using time_point_type = std::chrono::steady_clock::time_point;
 
 //----------------------------------------------------------------------------
 
