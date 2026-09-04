@@ -30,7 +30,7 @@
 //--------------------------------------------------------------------------------------------------------------------
 // #include "marty_cdt/types.h"
 // marty::chrome_devtools_protocol::
-// marty::cdp::
+// marty::cdt::
 
 namespace marty {
 namespace chrome_devtools_protocol {
@@ -79,13 +79,13 @@ struct Timeouts
 
 } // namespace chrome_devtools_protocol
 
-namespace cdp = chrome_devtools_protocol;
+namespace cdt = chrome_devtools_protocol;
 
 } // namespace marty
 
 // #include "marty_cdt/types.h"
 // marty::chrome_devtools_protocol::
-// marty::cdp::
+// marty::cdt::
 
 //--------------------------------------------------------------------------------------------------------------------
 

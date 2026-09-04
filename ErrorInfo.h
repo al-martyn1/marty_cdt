@@ -22,7 +22,7 @@
 //--------------------------------------------------------------------------------------------------------------------
 // #include "marty_cdt/ErrorInfo.h"
 // marty::chrome_devtools_protocol::
-// marty::cdp::
+// marty::cdt::
 
 namespace marty {
 namespace chrome_devtools_protocol {
@@ -57,10 +57,10 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT( ErrorInfo
 //--------------------------------------------------------------------------------------------------------------------
 } // namespace chrome_devtools_protocol
 
-namespace cdp = chrome_devtools_protocol;
+namespace cdt = chrome_devtools_protocol;
 
 } // namespace marty
 
 // #include "marty_cdt/ErrorInfo.h"
 // marty::chrome_devtools_protocol::
-// marty::cdp::
+// marty::cdt::

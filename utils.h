@@ -36,7 +36,7 @@
 //--------------------------------------------------------------------------------------------------------------------
 // #include "marty_cdt/utils.h"
 // marty::chrome_devtools_protocol::utils::
-// marty::cdp::utils::
+// marty::cdt::utils::
 
 namespace marty {
 namespace chrome_devtools_protocol {
@@ -490,7 +490,7 @@ ix::HttpResponsePtr runConnectAndGetJsonList( const std::string              &ht
         do
         {
             //cout << "Connect try: " << nConnectTry << "\n";
-            response = httpGetJsonList(httpBaseUrl, connectTimeouts); //umba::cdp::utils::httpGet(jsonListUrl, connectTimeouts);
+            response = httpGetJsonList(httpBaseUrl, connectTimeouts); //umba::cdt::utils::httpGet(jsonListUrl, connectTimeouts);
             if (ixHttpErrorCodeIsOk(response->errorCode))
                 return response;
 
@@ -797,13 +797,13 @@ ix::WebSocketSendInfo wsSendCommand(ix::WebSocket& webSocket, unsigned cmdId, co
 } // namespace utils
 } // namespace chrome_devtools_protocol
 
-namespace cdp = chrome_devtools_protocol;
+namespace cdt = chrome_devtools_protocol;
 
 } // namespace marty
 
 // #include "marty_cdt/utils.h"
 // marty::chrome_devtools_protocol::utils::
-// marty::cdp::utils::
+// marty::cdt::utils::
 
 //--------------------------------------------------------------------------------------------------------------------
 

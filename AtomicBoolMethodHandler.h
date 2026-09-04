@@ -1,7 +1,7 @@
 /*! \file
     \author Alexander Martynov (Marty AKA al-martyn1) <amart@mail.ru>
     \copyright (c) 2026 Alexander Martynov
-    \brief AtomicBoolIdHandler
+    \brief AtomicBoolMethodHandler
 
     Repository: https://github.com/al-martyn1/marty_cdt
  */
@@ -28,7 +28,7 @@
 
 
 //--------------------------------------------------------------------------------------------------------------------
-// #include "marty_cdt/AtomicBoolIdHandler.h"
+// #include "marty_cdt/AtomicBoolMethodHandler.h"
 // marty::chrome_devtools_protocol::
 // marty::cdt::
 
@@ -40,7 +40,7 @@ namespace chrome_devtools_protocol {
 
 
 //--------------------------------------------------------------------------------------------------------------------
-struct AtomicBoolIdHandler
+struct AtomicBoolMethodHandler
 {
     std::atomic<bool>   &atomicBool;
 
@@ -60,7 +60,7 @@ struct AtomicBoolIdHandler
         //{}
     }
 
-}; // struct AtomicBoolIdHandler
+}; // struct AtomicBoolMethodHandler
 
 //--------------------------------------------------------------------------------------------------------------------
 
@@ -73,6 +73,6 @@ namespace cdt = chrome_devtools_protocol;
 
 } // namespace marty
 
-// #include "marty_cdt/AtomicBoolIdHandler.h"
+// #include "marty_cdt/AtomicBoolMethodHandler.h"
 // marty::chrome_devtools_protocol::
 // marty::cdt::

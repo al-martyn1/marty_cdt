@@ -45,7 +45,7 @@
 //--------------------------------------------------------------------------------------------------------------------
 // #include "marty_cdt/Connection.h"
 // marty::chrome_devtools_protocol::
-// marty::cdp::
+// marty::cdt::
 
 namespace marty {
 namespace chrome_devtools_protocol {
@@ -55,7 +55,7 @@ namespace chrome_devtools_protocol {
 
 
 //----------------------------------------------------------------------------
-    // auto wsConnectRes = marty::cdp::utils::wsConnect( webSocket, defaultNewTabPageWsUrl // newPageWsUrl
+    // auto wsConnectRes = marty::cdt::utils::wsConnect( webSocket, defaultNewTabPageWsUrl // newPageWsUrl
     //                                                 , [&](const ix::WebSocketMessagePtr& pMsg)
     //                                                   {
 
@@ -434,7 +434,7 @@ protected:
             {
                 if (msg.str.empty())
                 {
-                    throw std::runtime_error("marty::cdp::Connection::processMessage: Message doesn't contain data");
+                    throw std::runtime_error("marty::cdt::Connection::processMessage: Message doesn't contain data");
                 }
 
                 j = json::parse(msg.str);
@@ -469,7 +469,7 @@ protected:
                     }
                     else
                     {
-                        throw std::runtime_error( "marty::cdp::Connection::processMessage: Message doesn't contain known data:\n"
+                        throw std::runtime_error( "marty::cdt::Connection::processMessage: Message doesn't contain known data:\n"
                                                 + j.dump(2)
                                                 );
                     }
@@ -480,7 +480,7 @@ protected:
             {
                 auto method = j["method"].get<std::string>();
                 if (method.empty())
-                    throw std::runtime_error("marty::cdp::Connection::processMessage: Message contains empty 'method'");
+                    throw std::runtime_error("marty::cdt::Connection::processMessage: Message contains empty 'method'");
 
                 auto methodHandler = findMethodEventHandler(method);
                 if (methodHandler)
@@ -498,7 +498,7 @@ protected:
 
             else
             {
-                throw std::runtime_error( "marty::cdp::Connection::processMessage: unknown Message type, message data:\n"
+                throw std::runtime_error( "marty::cdt::Connection::processMessage: unknown Message type, message data:\n"
                                         + j.dump(2)
                                         );
             }
@@ -508,7 +508,7 @@ protected:
         else // unknown msg.type
         {
             // Кинуть исключение?
-            throw std::runtime_error("marty::cdp::Connection::processMessage: unknown Message type");
+            throw std::runtime_error("marty::cdt::Connection::processMessage: unknown Message type");
         }
 
     }
@@ -941,6 +941,6 @@ namespace cdp = chrome_devtools_protocol;
 
 // #include "marty_cdt/Connection.h"
 // marty::chrome_devtools_protocol::
-// marty::cdp::
+// marty::cdt::
 
 //--------------------------------------------------------------------------------------------------------------------

@@ -22,7 +22,7 @@
 //--------------------------------------------------------------------------------------------------------------------
 // #include "marty_cdt/JsonVersionResponse.h"
 // marty::chrome_devtools_protocol::
-// marty::cdp::
+// marty::cdt::
 
 namespace marty {
 namespace chrome_devtools_protocol {
@@ -145,10 +145,10 @@ void from_json(const json& j, JsonVersionResponse &r)
 
 } // namespace chrome_devtools_protocol
 
-namespace cdp = chrome_devtools_protocol;
+namespace cdt = chrome_devtools_protocol;
 
 } // namespace marty
 
 // #include "marty_cdt/JsonVersionResponse.h"
 // marty::chrome_devtools_protocol::
-// marty::cdp::
+// marty::cdt::
