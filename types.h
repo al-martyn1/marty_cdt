@@ -9,8 +9,8 @@
 #pragma once
 
 //--------------------------------------------------------------------------------------------------------------------
-#include "umba/filename.h"
-#include "umba/filesys.h"
+// #include "umba/filename.h"
+// #include "umba/filesys.h"
 
 //
 #include <ixwebsocket/IXNetSystem.h>
@@ -96,8 +96,20 @@ namespace cdt = chrome_devtools_protocol;
 
 
 //--------------------------------------------------------------------------------------------------------------------
+
+// #include "AtomicBoolIdHandler.h"
+// #include "AtomicBoolMethodHandler.h"
+#include "Dom.h"
+#include "ErrorInfo.h"
 #include "JsonListResponse.h"
 #include "JsonVersionResponse.h"
+#include "MessageIdVariant.h"
+#include "PageNavigateResponse.h"
+#include "ResponseError.h"
+#include "WebSocketMessage.h"
+
+
+
 
 //--------------------------------------------------------------------------------------------------------------------
 

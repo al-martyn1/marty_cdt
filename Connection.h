@@ -11,6 +11,8 @@
 //--------------------------------------------------------------------------------------------------------------------
 #include "types.h"
 //
+#include "defs.h"
+//
 #include "utils.h"
 //
 #include "ErrorInfo.h"
@@ -20,6 +22,9 @@
 #include "WebSocketMessage.h"
 //
 #include "MessageIdVariant.h"
+//
+// #include "AtomicBoolIdHandler.h"
+// #include "AtomicBoolMethodHandler.h"
 
 //
 #include <atomic>
@@ -31,6 +36,7 @@
 #include <memory>
 #include <mutex>
 #include <queue>
+#include <stack>
 #include <string>
 #include <stdexcept>
 #include <thread>
@@ -310,6 +316,8 @@ protected:
     std::unordered_map<ix::WebSocketMessageType, SystemEventHandlerType>      m_systemHandlers;
     mutable mutex_type                                                        m_systemHandlersMutex;
 
+
+    std::stack<std::unordered_map<std::string, MessageHandlerType> >          m_methodHandlersStack;
     std::unordered_map<std::string, MessageHandlerType>                       m_methodHandlers;
     mutable std::unordered_map<std::string, std::vector<std::string> >        m_methodHandlerPatternsCache;
     mutable mutex_type                                                        m_methodHandlersMutex;
@@ -568,8 +576,11 @@ protected:
     // std::deque<MessageDispatchQueueEntry>    m_dispatchQueue;
 
 
-
-
+    //--------------------------------------------------
+    void throwResponseErrorMessage(const char *fnFrom, const ResponseError &err)
+    {
+        throw std::runtime_error(std::string(fnFrom) + ": " + std::to_string(err.errorInfo.code) + ": " + err.errorInfo.message);
+    }
 
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -619,6 +630,22 @@ public:
 
 
     //--------------------------------------------------
+    void wsPushMethodEventHandlers()
+    {
+        std::lock_guard<mutex_type> lock(m_methodHandlersMutex);
+        m_methodHandlersStack.push(m_methodHandlers);
+    }
+
+    void wsPopMethodEventHandlers()
+    {
+        std::lock_guard<mutex_type> lock(m_methodHandlersMutex);
+        if (m_methodHandlersStack.empty())
+            throw std::runtime_error("marty::cdt::Connection::wsPopMethodEventHandlers: stack empty, failed to pop MethodEventHandlers");
+
+        m_methodHandlers = m_methodHandlersStack.top();
+        m_methodHandlersStack.pop();
+    }
+
     void wsSetMethodEventHandler(const std::string &method, MessageHandlerType handler)
     {
         std::lock_guard<mutex_type> lock(m_methodHandlersMutex);
@@ -638,6 +665,8 @@ public:
         for(auto m: methods)
             m_methodHandlers[m] = handler;
     }
+
+
 
 
     //--------------------------------------------------
@@ -939,7 +968,135 @@ public:
     }
 
 
+    void wsSendCommandThrowable(const std::string &calledFrom, const std::string &method, json params, MessageHandlerType handler)
+    {
+        auto res = wsSendCommand(method, params, handler);
+        if (!res.success)
+            throw std::runtime_error("from '" + calledFrom + "': failed to send command '" + method + "'");
+    }
+
+    void wsSendCommandThrowable(const std::string &calledFrom, const std::string &method, json params)
+    {
+        auto res = wsSendCommand(method, params);
+        if (!res.success)
+            throw std::runtime_error("from '" + calledFrom + "': failed to send command '" + method + "'");
+    }
+
+    void wsSendCommandThrowable(const std::string &calledFrom, const std::string &method, MessageHandlerType handler)
+    {
+        auto res = wsSendCommand(method, handler);
+        if (!res.success)
+            throw std::runtime_error("from '" + calledFrom + "': failed to send command '" + method + "'");
+    }
+
+    void wsSendCommandThrowable(const std::string &calledFrom, const std::string &method)
+    {
+        auto res = wsSendCommand(method);
+        if (!res.success)
+            throw std::runtime_error("from '" + calledFrom + "': failed to send command '" + method + "'");
+    }
+
+
+    // ix::WebSocketSendInfo wsSendCommand(const std::string &method, json params, MessageHandlerType handler)
+    // {
+    //     auto newId = m_wsCommandId++;
+    //  
+    //     auto res = utils::wsSendCommand(m_webSocket, newId, method, params);
+    //     if (res.success)
+    //         enqueIdHandler(newId, handler);
+    //  
+    //     return res;
+    // }
+    //  
+    // ix::WebSocketSendInfo wsSendCommand(const std::string &method, json params)
+    // {
+    //     return utils::wsSendCommand(m_webSocket, m_wsCommandId++, method, params);
+    // }
+    //  
+    // ix::WebSocketSendInfo wsSendCommand(const std::string &method, MessageHandlerType handler)
+    // {
+    //     return wsSendCommand(method, json(), handler);
+    // }
+    //  
+    // ix::WebSocketSendInfo wsSendCommand(const std::string &method)
+    // {
+    //     return wsSendCommand(method, json());
+    // }
+
+
+
+
     //--------------------------------------------------
+    // Возвращает true, если дождались события, и false, если прошел заданный timeoutMs
+    // throws exception on error
+    bool cdtPageNavigate( PageNavigateResponse &response
+                        , const std::string    &url
+                        , unsigned             timeoutMs   = 10000
+                        , bool                 waitForLoadCompletion = true
+                        )
+    {
+        wsPushMethodEventHandlers();
+
+        try
+        {
+            // Если не надо ждать, то сразу в сигнальном состоянии
+            std::atomic<bool> domContentEventFiredFlag = waitForLoadCompletion ? false : true;
+            std::atomic<bool> loadEventFiredFlag       = waitForLoadCompletion ? false : true;
+    
+            wsSetMethodEventHandler("Page.domContentEventFired", marty::cdt::AtomicBoolMethodHandler{domContentEventFiredFlag, false}); // false - в консоль ничего не выводим
+            wsSetMethodEventHandler("Page.loadEventFired"      , marty::cdt::AtomicBoolMethodHandler{loadEventFiredFlag      , false});
+
+            std::atomic<bool> pageNavigateFlag = false;
+            wsSendCommandThrowable( __func__ // "cdtPageNavigate"
+                                  , "Page.navigate", { {"url", url} }
+                                  , [&](marty::cdt::Connection * /* pCon */, const marty::cdt::WebSocketMessage& /* msg */, marty::cdt::MessageIdVariant idVariant, marty::cdt::json j)
+                                    {
+                                        std::visit( [&](auto&& arg)
+                                                    {
+                                                        using T = std::decay_t<decltype(arg)>;
+  
+                                                        if constexpr (std::is_same_v<T, unsigned>)
+                                                        {
+                                                            // Ok, nothing to do
+                                                        }
+                                                        else if constexpr (std::is_same_v<T, std::string>)
+                                                        {
+                                                            throw std::runtime_error(std::string(__func__) + ": awaiting ID, but got method: '" + std::get<std::string>(idVariant) + "'");
+                                                        }
+                                                        else if constexpr (std::is_same_v<T, marty::cdt::ResponseError>)
+                                                        {
+                                                            throwResponseErrorMessage(__func__, arg);
+                                                            // throw std::runtime_error(std::string(__func__) + ": " + std::to_string(arg.errorInfo.code) + ": " + arg.errorInfo.message);
+                                                        }
+                                                    }
+                                                  , idVariant
+                                                  );
+
+
+                                        from_json(j, response);
+                                        pageNavigateFlag = true;
+                                    }
+                                  );
+
+            bool bRes = wsWaitAndDispatchMessages( timeoutMs
+                                                 , [&]() -> bool
+                                                   {
+                                                       return bool(pageNavigateFlag) && bool(domContentEventFiredFlag) && bool(loadEventFiredFlag);
+                                                   }
+                                                 );
+            wsPopMethodEventHandlers();
+
+            return bRes;
+        }
+        catch(...)
+        {
+            wsPopMethodEventHandlers();
+            throw;
+        }
+
+    }
+
+
 
 }; // class Connection
 
