@@ -582,6 +582,12 @@ protected:
         throw std::runtime_error(std::string(fnFrom) + ": " + std::to_string(err.errorInfo.code) + ": " + err.errorInfo.message);
     }
 
+    void throwGotMethodInsteadOfId(const char *fnFrom, const std::string &method)
+    {
+        throw std::runtime_error(std::string(fnFrom) + ": awaiting ID, but got method: '" + method + "'");
+    }
+    
+
 
 //--------------------------------------------------------------------------------------------------------------------
 public:
@@ -1033,69 +1039,106 @@ public:
                         , const std::string    &url
                         , unsigned             timeoutMs   = 10000
                         , bool                 waitForLoadCompletion = true
-                        )
-    {
-        wsPushMethodEventHandlers();
+                        );
 
-        try
-        {
-            // Если не надо ждать, то сразу в сигнальном состоянии
-            std::atomic<bool> domContentEventFiredFlag = waitForLoadCompletion ? false : true;
-            std::atomic<bool> loadEventFiredFlag       = waitForLoadCompletion ? false : true;
-    
-            wsSetMethodEventHandler("Page.domContentEventFired", marty::cdt::AtomicBoolMethodHandler{domContentEventFiredFlag, false}); // false - в консоль ничего не выводим
-            wsSetMethodEventHandler("Page.loadEventFired"      , marty::cdt::AtomicBoolMethodHandler{loadEventFiredFlag      , false});
+    bool cdtDomGetDocument( json       &jResult
+                          , int        depth     = -1     // вся глубина
+                          , bool       pierce    = true   // проникать через shadow DOM
+                          , unsigned   timeoutMs = 10000
+                          );
 
-            std::atomic<bool> pageNavigateFlag = false;
-            wsSendCommandThrowable( __func__ // "cdtPageNavigate"
-                                  , "Page.navigate", { {"url", url} }
-                                  , [&](marty::cdt::Connection * /* pCon */, const marty::cdt::WebSocketMessage& /* msg */, marty::cdt::MessageIdVariant idVariant, marty::cdt::json j)
-                                    {
-                                        std::visit( [&](auto&& arg)
-                                                    {
-                                                        using T = std::decay_t<decltype(arg)>;
-  
-                                                        if constexpr (std::is_same_v<T, unsigned>)
-                                                        {
-                                                            // Ok, nothing to do
-                                                        }
-                                                        else if constexpr (std::is_same_v<T, std::string>)
-                                                        {
-                                                            throw std::runtime_error(std::string(__func__) + ": awaiting ID, but got method: '" + std::get<std::string>(idVariant) + "'");
-                                                        }
-                                                        else if constexpr (std::is_same_v<T, marty::cdt::ResponseError>)
-                                                        {
-                                                            throwResponseErrorMessage(__func__, arg);
-                                                            // throw std::runtime_error(std::string(__func__) + ": " + std::to_string(arg.errorInfo.code) + ": " + arg.errorInfo.message);
-                                                        }
-                                                    }
-                                                  , idVariant
-                                                  );
+    bool cdtDomGetDocument( DomDocument &domDocument
+                          , int         depth     = -1     // вся глубина
+                          , bool        pierce    = true   // проникать через shadow DOM
+                          , unsigned    timeoutMs = 10000
+                          );
 
-
-                                        from_json(j, response);
-                                        pageNavigateFlag = true;
-                                    }
-                                  );
-
-            bool bRes = wsWaitAndDispatchMessages( timeoutMs
-                                                 , [&]() -> bool
-                                                   {
-                                                       return bool(pageNavigateFlag) && bool(domContentEventFiredFlag) && bool(loadEventFiredFlag);
-                                                   }
-                                                 );
-            wsPopMethodEventHandlers();
-
-            return bRes;
-        }
-        catch(...)
-        {
-            wsPopMethodEventHandlers();
-            throw;
-        }
-
-    }
-
+    bool cdtRuntimEvaluate( json                             &jResult
+                          , const std::string                &expression
+                          , unsigned                         timeoutMs = 10000
+                          , RuntimEvaluateReturnType         returnType = RuntimEvaluateReturnType::returnByValue               // returnByValue                    
+                          , const std::string                &contextId = std::string()                                         // integer as string or empty string
+                          , const std::string                &objectGroup = std::string()                                       // object group name string         
+                          , RuntimEvaluateAwaitPromise       awaitPromise = RuntimEvaluateAwaitPromise::unspecified             // awaitPromise                     
+                          , RuntimEvaluateUserGesture        userGesture = RuntimEvaluateUserGesture::unspecified               // userGesture                      
+                          , RuntimEvaluateThrowOnSideEffect  throwOnSideEffect = RuntimEvaluateThrowOnSideEffect::unspecified   // throwOnSideEffect                
+                          , RuntimEvaluateBreaksControl      breaksControl = RuntimEvaluateBreaksControl::unspecified           // disableBreaks                    
+                          , RuntimEvaluateReplMode           replMode = RuntimEvaluateReplMode::unspecified                     // replMode                         
+                          , RuntimEvaluateCspMode            cspMode = RuntimEvaluateCspMode::unspecified                       // allowUnsafeEvalBlockedByCSP      
+                          );
+// enum class RuntimEvaluateReturnType
+// {
+//     unspecified      = -1,
+//     objectId         = 0,
+//     returnByValue
+//  
+// }; // enum class RuntimEvaluateReturnType
+//  
+//  
+//  
+// //--------------------------------------------------------------------------------------------------------------------
+// enum class RuntimEvaluateAwaitPromise
+// {
+//     unspecified      = -1,
+//     dontAwaitPromise = 0,
+//     awaitPromise
+//  
+// }; // enum class RuntimEvaluateAwaitPromise
+//  
+//  
+//  
+// //--------------------------------------------------------------------------------------------------------------------
+// enum class RuntimEvaluateUserGesture
+// {
+//     unspecified      = -1,
+//     noUserGesture    = 0,
+//     userGesture
+//  
+// }; // enum class RuntimEvaluateUserGesture
+//  
+//  
+//  
+// //--------------------------------------------------------------------------------------------------------------------
+// enum class RuntimEvaluateThrowOnSideEffect
+// {
+//     unspecified      = -1,
+//     noThrowOnSideEffect = 0,
+//     throwOnSideEffect
+//  
+// }; // enum class RuntimEvaluateThrowOnSideEffect
+//  
+//  
+//  
+// //--------------------------------------------------------------------------------------------------------------------
+// enum class RuntimEvaluateBreaksControl
+// {
+//     unspecified      = -1,
+//     enableBreaks     = 0,
+//     disableBreaks
+//  
+// }; // enum class RuntimEvaluateBreaksControl
+//  
+//  
+//  
+// //--------------------------------------------------------------------------------------------------------------------
+// enum class RuntimEvaluateReplMode
+// {
+//     unspecified      = -1,
+//     noReplMode      = 0,
+//     replMode,
+//  
+// }; // enum class RuntimEvaluateReplMode
+//  
+//  
+//  
+// //--------------------------------------------------------------------------------------------------------------------
+// enum class RuntimEvaluateCspMode // Content Security Policy
+// {
+//     unspecified      = -1,
+//     useCsp           = 0,
+//     allowUnsafeEvalBlockedByCSP,
+//  
+// }; // enum class RuntimEvaluateCspMode
 
 
 }; // class Connection
@@ -1115,3 +1158,7 @@ namespace cdp = chrome_devtools_protocol;
 // marty::cdt::
 
 //--------------------------------------------------------------------------------------------------------------------
+
+
+#include "impl/Connection.h"
+

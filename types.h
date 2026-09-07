@@ -75,6 +75,87 @@ struct Timeouts
 
 }; // struct Timeouts
 
+//--------------------------------------------------------------------------------------------------------------------
+
+
+
+//--------------------------------------------------------------------------------------------------------------------
+enum class RuntimEvaluateReturnType
+{
+    unspecified      = -1,
+    objectId         = 0,
+    returnByValue
+
+}; // enum class RuntimEvaluateReturnType
+
+
+
+//--------------------------------------------------------------------------------------------------------------------
+enum class RuntimEvaluateAwaitPromise
+{
+    unspecified      = -1,
+    dontAwaitPromise = 0,
+    awaitPromise
+
+}; // enum class RuntimEvaluateAwaitPromise
+
+
+
+//--------------------------------------------------------------------------------------------------------------------
+enum class RuntimEvaluateUserGesture
+{
+    unspecified      = -1,
+    noUserGesture    = 0,
+    userGesture
+
+}; // enum class RuntimEvaluateUserGesture
+
+
+
+//--------------------------------------------------------------------------------------------------------------------
+enum class RuntimEvaluateThrowOnSideEffect
+{
+    unspecified      = -1,
+    noThrowOnSideEffect = 0,
+    throwOnSideEffect
+
+}; // enum class RuntimEvaluateThrowOnSideEffect
+
+
+
+//--------------------------------------------------------------------------------------------------------------------
+enum class RuntimEvaluateBreaksControl
+{
+    unspecified      = -1,
+    enableBreaks     = 0,
+    disableBreaks
+
+}; // enum class RuntimEvaluateBreaksControl
+
+
+
+//--------------------------------------------------------------------------------------------------------------------
+enum class RuntimEvaluateReplMode
+{
+    unspecified      = -1,
+    noReplMode      = 0,
+    replMode,
+
+}; // enum class RuntimEvaluateReplMode
+
+
+
+//--------------------------------------------------------------------------------------------------------------------
+enum class RuntimEvaluateCspMode // Content Security Policy
+{
+    unspecified      = -1,
+    useCsp           = 0,
+    allowUnsafeEvalBlockedByCSP,
+
+}; // enum class RuntimEvaluateCspMode
+
+//--------------------------------------------------------------------------------------------------------------------
+
 
 
 
