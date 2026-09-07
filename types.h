@@ -80,83 +80,136 @@ struct Timeouts
 
 
 //--------------------------------------------------------------------------------------------------------------------
-enum class RuntimEvaluateReturnType
+enum class RuntimeEvaluateReturnType
 {
     unspecified      = -1,
     objectId         = 0,
     returnByValue
 
-}; // enum class RuntimEvaluateReturnType
+}; // enum class RuntimeEvaluateReturnType
+
+inline
+std::string to_string(RuntimeEvaluateReturnType v)
+{
+    return v==RuntimeEvaluateReturnType::unspecified ? "unspecified" : (v==RuntimeEvaluateReturnType::objectId ? "objectId" : "returnByValue");
+}
+
+//--------------------------------------------------------------------------------------------------------------------
 
 
 
 //--------------------------------------------------------------------------------------------------------------------
-enum class RuntimEvaluateAwaitPromise
+enum class RuntimeEvaluateAwaitPromise
 {
     unspecified      = -1,
     dontAwaitPromise = 0,
     awaitPromise
 
-}; // enum class RuntimEvaluateAwaitPromise
+}; // enum class RuntimeEvaluateAwaitPromise
+
+inline
+std::string to_string(RuntimeEvaluateAwaitPromise v)
+{
+    return v==RuntimeEvaluateAwaitPromise::unspecified ? "unspecified" : (v==RuntimeEvaluateAwaitPromise::dontAwaitPromise ? "dontAwaitPromise" : "awaitPromise");
+}
+
+//--------------------------------------------------------------------------------------------------------------------
 
 
 
 //--------------------------------------------------------------------------------------------------------------------
-enum class RuntimEvaluateUserGesture
+enum class RuntimeEvaluateUserGesture
 {
     unspecified      = -1,
     noUserGesture    = 0,
     userGesture
 
-}; // enum class RuntimEvaluateUserGesture
+}; // enum class RuntimeEvaluateUserGesture
+
+inline
+std::string to_string(RuntimeEvaluateUserGesture v)
+{
+    return v==RuntimeEvaluateUserGesture::unspecified ? "unspecified" : (v==RuntimeEvaluateUserGesture::noUserGesture ? "noUserGesture" : "userGesture");
+}
+
+//--------------------------------------------------------------------------------------------------------------------
 
 
 
 //--------------------------------------------------------------------------------------------------------------------
-enum class RuntimEvaluateThrowOnSideEffect
+enum class RuntimeEvaluateThrowOnSideEffect
 {
-    unspecified      = -1,
+    unspecified         = -1,
     noThrowOnSideEffect = 0,
     throwOnSideEffect
 
-}; // enum class RuntimEvaluateThrowOnSideEffect
+}; // enum class RuntimeEvaluateThrowOnSideEffect
+
+inline
+std::string to_string(RuntimeEvaluateThrowOnSideEffect v)
+{
+    return v==RuntimeEvaluateThrowOnSideEffect::unspecified ? "unspecified" : (v==RuntimeEvaluateThrowOnSideEffect::noThrowOnSideEffect ? "noThrowOnSideEffect" : "throwOnSideEffect");
+}
+
+//--------------------------------------------------------------------------------------------------------------------
 
 
 
 //--------------------------------------------------------------------------------------------------------------------
-enum class RuntimEvaluateBreaksControl
+enum class RuntimeEvaluateBreaksControl
 {
     unspecified      = -1,
     enableBreaks     = 0,
+    noDisableBreaks  = enableBreaks,
     disableBreaks
 
-}; // enum class RuntimEvaluateBreaksControl
+}; // enum class RuntimeEvaluateBreaksControl
+
+inline
+std::string to_string(RuntimeEvaluateBreaksControl v)
+{
+    return v==RuntimeEvaluateBreaksControl::unspecified ? "unspecified" : (v==RuntimeEvaluateBreaksControl::enableBreaks ? "noDisableBreaks" : "disableBreaks");
+}
+
+//--------------------------------------------------------------------------------------------------------------------
 
 
 
 //--------------------------------------------------------------------------------------------------------------------
-enum class RuntimEvaluateReplMode
+enum class RuntimeEvaluateReplMode
 {
     unspecified      = -1,
     noReplMode      = 0,
     replMode,
 
-}; // enum class RuntimEvaluateReplMode
+}; // enum class RuntimeEvaluateReplMode
+
+inline
+std::string to_string(RuntimeEvaluateReplMode v)
+{
+    return v==RuntimeEvaluateReplMode::unspecified ? "unspecified" : (v==RuntimeEvaluateReplMode::noReplMode ? "noReplMode" : "replMode");
+}
+
+//--------------------------------------------------------------------------------------------------------------------
 
 
 
 //--------------------------------------------------------------------------------------------------------------------
-enum class RuntimEvaluateCspMode // Content Security Policy
+enum class RuntimeEvaluateCspMode // Content Security Policy
 {
     unspecified      = -1,
     useCsp           = 0,
+    dontAllowUnsafeEvalBlockedByCSP = useCsp,
     allowUnsafeEvalBlockedByCSP,
 
-}; // enum class RuntimEvaluateCspMode
+}; // enum class RuntimeEvaluateCspMode
 
+inline
+std::string to_string(RuntimeEvaluateCspMode v)
+{
+    return v==RuntimeEvaluateCspMode::unspecified ? "unspecified" : (v==RuntimeEvaluateCspMode::allowUnsafeEvalBlockedByCSP ? "allowUnsafeEvalBlockedByCSP" : "dontAllowUnsafeEvalBlockedByCSP");
+}
 //--------------------------------------------------------------------------------------------------------------------
-
-
 
 
 

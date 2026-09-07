@@ -200,11 +200,9 @@ int generatePortNumberForProjectConnection(std::string projectPath, int startPor
 inline
 std::string generateConnectionBaseUrlString(int port, bool http=false)
 {
-    using namespace std;
-
     // ws://localhost:9222
     // http://localhost:9222/json/list
-    return std::string(http ? "http" : "ws") + "://localhost:" + to_string(port);
+    return std::string(http ? "http" : "ws") + "://localhost:" + std::to_string(port);
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -218,14 +216,12 @@ std::vector<std::string> generateArgsForSpawnChromeExactDirs( const std::string 
                                                             , int port
                                                             )
 {
-    using namespace std;
-
     std::vector<std::string> argsVec;
 
-    std::string schemeSepLocalhostPort = "://localhost:" + to_string(port);
+    std::string schemeSepLocalhostPort = "://localhost:" + std::to_string(port);
 
     argsVec.push_back("--new-window"); // "--new-tab"
-    argsVec.push_back("--remote-debugging-port=" + to_string(port));
+    argsVec.push_back("--remote-debugging-port=" + std::to_string(port));
     argsVec.push_back("--remote-allow-origins=http" + schemeSepLocalhostPort + ",ws" + schemeSepLocalhostPort + ",wss" + schemeSepLocalhostPort);
     argsVec.push_back("--user-data-dir="  + userDataDir);
     argsVec.push_back("--disk-cache-dir=" + diskCacheDir);

@@ -1053,92 +1053,19 @@ public:
                           , unsigned    timeoutMs = 10000
                           );
 
-    bool cdtRuntimEvaluate( json                             &jResult
-                          , const std::string                &expression
-                          , unsigned                         timeoutMs = 10000
-                          , RuntimEvaluateReturnType         returnType = RuntimEvaluateReturnType::returnByValue               // returnByValue                    
-                          , const std::string                &contextId = std::string()                                         // integer as string or empty string
-                          , const std::string                &objectGroup = std::string()                                       // object group name string         
-                          , RuntimEvaluateAwaitPromise       awaitPromise = RuntimEvaluateAwaitPromise::unspecified             // awaitPromise                     
-                          , RuntimEvaluateUserGesture        userGesture = RuntimEvaluateUserGesture::unspecified               // userGesture                      
-                          , RuntimEvaluateThrowOnSideEffect  throwOnSideEffect = RuntimEvaluateThrowOnSideEffect::unspecified   // throwOnSideEffect                
-                          , RuntimEvaluateBreaksControl      breaksControl = RuntimEvaluateBreaksControl::unspecified           // disableBreaks                    
-                          , RuntimEvaluateReplMode           replMode = RuntimEvaluateReplMode::unspecified                     // replMode                         
-                          , RuntimEvaluateCspMode            cspMode = RuntimEvaluateCspMode::unspecified                       // allowUnsafeEvalBlockedByCSP      
-                          );
-// enum class RuntimEvaluateReturnType
-// {
-//     unspecified      = -1,
-//     objectId         = 0,
-//     returnByValue
-//  
-// }; // enum class RuntimEvaluateReturnType
-//  
-//  
-//  
-// //--------------------------------------------------------------------------------------------------------------------
-// enum class RuntimEvaluateAwaitPromise
-// {
-//     unspecified      = -1,
-//     dontAwaitPromise = 0,
-//     awaitPromise
-//  
-// }; // enum class RuntimEvaluateAwaitPromise
-//  
-//  
-//  
-// //--------------------------------------------------------------------------------------------------------------------
-// enum class RuntimEvaluateUserGesture
-// {
-//     unspecified      = -1,
-//     noUserGesture    = 0,
-//     userGesture
-//  
-// }; // enum class RuntimEvaluateUserGesture
-//  
-//  
-//  
-// //--------------------------------------------------------------------------------------------------------------------
-// enum class RuntimEvaluateThrowOnSideEffect
-// {
-//     unspecified      = -1,
-//     noThrowOnSideEffect = 0,
-//     throwOnSideEffect
-//  
-// }; // enum class RuntimEvaluateThrowOnSideEffect
-//  
-//  
-//  
-// //--------------------------------------------------------------------------------------------------------------------
-// enum class RuntimEvaluateBreaksControl
-// {
-//     unspecified      = -1,
-//     enableBreaks     = 0,
-//     disableBreaks
-//  
-// }; // enum class RuntimEvaluateBreaksControl
-//  
-//  
-//  
-// //--------------------------------------------------------------------------------------------------------------------
-// enum class RuntimEvaluateReplMode
-// {
-//     unspecified      = -1,
-//     noReplMode      = 0,
-//     replMode,
-//  
-// }; // enum class RuntimEvaluateReplMode
-//  
-//  
-//  
-// //--------------------------------------------------------------------------------------------------------------------
-// enum class RuntimEvaluateCspMode // Content Security Policy
-// {
-//     unspecified      = -1,
-//     useCsp           = 0,
-//     allowUnsafeEvalBlockedByCSP,
-//  
-// }; // enum class RuntimEvaluateCspMode
+    bool cdtRuntimeEvaluate( json                              &jResult
+                           , const std::string                 &expression
+                           , unsigned                          timeoutMs = 10000
+                           , RuntimeEvaluateReturnType         returnType = RuntimeEvaluateReturnType::returnByValue               // returnByValue                    
+                           , const std::string                 &contextId = std::string()                                          // integer as string or empty string
+                           , const std::string                 &objectGroup = std::string()                                        // object group name string         
+                           , RuntimeEvaluateAwaitPromise       awaitPromise = RuntimeEvaluateAwaitPromise::unspecified             // awaitPromise                     
+                           , RuntimeEvaluateUserGesture        userGesture = RuntimeEvaluateUserGesture::unspecified               // userGesture                      
+                           , RuntimeEvaluateThrowOnSideEffect  throwOnSideEffect = RuntimeEvaluateThrowOnSideEffect::unspecified   // throwOnSideEffect                
+                           , RuntimeEvaluateBreaksControl      breaksControl = RuntimeEvaluateBreaksControl::unspecified           // disableBreaks                    
+                           , RuntimeEvaluateReplMode           replMode = RuntimeEvaluateReplMode::unspecified                     // replMode                         
+                           , RuntimeEvaluateCspMode            cspMode = RuntimeEvaluateCspMode::unspecified                       // allowUnsafeEvalBlockedByCSP      
+                           );
 
 
 }; // class Connection

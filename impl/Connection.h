@@ -160,24 +160,24 @@ bool Connection::cdtDomGetDocument( DomDocument &domDocument
 }
 
 //--------------------------------------------------------------------------------------------------------------------
-bool Connection::cdtRuntimEvaluate( json                             &jResult
-                                  , const std::string                &expression
-                                  , unsigned                         timeoutMs
-                                  , RuntimEvaluateReturnType         returnType         // returnByValue
-                                  , const std::string                &contextId         // integer as string or empty string
-                                  , const std::string                &objectGroup       // object group name string 
-                                  , RuntimEvaluateAwaitPromise       awaitPromise       // awaitPromise
-                                  , RuntimEvaluateUserGesture        userGesture        // userGesture
-                                  , RuntimEvaluateThrowOnSideEffect  throwOnSideEffect  // throwOnSideEffect
-                                  , RuntimEvaluateBreaksControl      breaksControl      // disableBreaks
-                                  , RuntimEvaluateReplMode           replMode           // replMode
-                                  , RuntimEvaluateCspMode            cspMode            // allowUnsafeEvalBlockedByCSP
-                                  )
+bool Connection::cdtRuntimeEvaluate( json                             &jResult
+                                   , const std::string                &expression
+                                   , unsigned                         timeoutMs
+                                   , RuntimeEvaluateReturnType         returnType         // returnByValue
+                                   , const std::string                &contextId         // integer as string or empty string
+                                   , const std::string                &objectGroup       // object group name string 
+                                   , RuntimeEvaluateAwaitPromise       awaitPromise       // awaitPromise
+                                   , RuntimeEvaluateUserGesture        userGesture        // userGesture
+                                   , RuntimeEvaluateThrowOnSideEffect  throwOnSideEffect  // throwOnSideEffect
+                                   , RuntimeEvaluateBreaksControl      breaksControl      // disableBreaks
+                                   , RuntimeEvaluateReplMode           replMode           // replMode
+                                   , RuntimeEvaluateCspMode            cspMode            // allowUnsafeEvalBlockedByCSP
+                                   )
 {
     json jParams = { { "expression", expression } };
 
-    if (returnType!=RuntimEvaluateReturnType::unspecified)
-        jParams["returnByValue"] = (returnType==RuntimEvaluateReturnType::returnByValue);
+    if (returnType!=RuntimeEvaluateReturnType::unspecified)
+        jParams["returnByValue"] = (returnType==RuntimeEvaluateReturnType::returnByValue);
 
     if (!contextId.empty())
         jParams["contextId"] = std::stoi(contextId);
@@ -185,23 +185,23 @@ bool Connection::cdtRuntimEvaluate( json                             &jResult
     if (!objectGroup.empty())
         jParams["objectGroup"] = objectGroup;
 
-    if (awaitPromise!=RuntimEvaluateAwaitPromise::unspecified)
-        jParams["awaitPromise"] = (awaitPromise==RuntimEvaluateAwaitPromise::awaitPromise);
+    if (awaitPromise!=RuntimeEvaluateAwaitPromise::unspecified)
+        jParams["awaitPromise"] = (awaitPromise==RuntimeEvaluateAwaitPromise::awaitPromise);
 
-    if (userGesture!=RuntimEvaluateUserGesture::unspecified)
-        jParams["userGesture"] = (userGesture==RuntimEvaluateUserGesture::userGesture);
+    if (userGesture!=RuntimeEvaluateUserGesture::unspecified)
+        jParams["userGesture"] = (userGesture==RuntimeEvaluateUserGesture::userGesture);
 
-    if (throwOnSideEffect!=RuntimEvaluateThrowOnSideEffect::unspecified)
-        jParams["throwOnSideEffect"] = (throwOnSideEffect==RuntimEvaluateThrowOnSideEffect::throwOnSideEffect);
+    if (throwOnSideEffect!=RuntimeEvaluateThrowOnSideEffect::unspecified)
+        jParams["throwOnSideEffect"] = (throwOnSideEffect==RuntimeEvaluateThrowOnSideEffect::throwOnSideEffect);
 
-    if (breaksControl!=RuntimEvaluateBreaksControl::unspecified)
-        jParams["disableBreaks"] = (breaksControl==RuntimEvaluateBreaksControl::disableBreaks);
+    if (breaksControl!=RuntimeEvaluateBreaksControl::unspecified)
+        jParams["disableBreaks"] = (breaksControl==RuntimeEvaluateBreaksControl::disableBreaks);
 
-    if (replMode!=RuntimEvaluateReplMode::unspecified)
-        jParams["replMode"] = (replMode==RuntimEvaluateReplMode::replMode);
+    if (replMode!=RuntimeEvaluateReplMode::unspecified)
+        jParams["replMode"] = (replMode==RuntimeEvaluateReplMode::replMode);
 
-    if (cspMode!=RuntimEvaluateCspMode::unspecified)
-        jParams["allowUnsafeEvalBlockedByCSP"] = (cspMode==RuntimEvaluateCspMode::allowUnsafeEvalBlockedByCSP);
+    if (cspMode!=RuntimeEvaluateCspMode::unspecified)
+        jParams["allowUnsafeEvalBlockedByCSP"] = (cspMode==RuntimeEvaluateCspMode::allowUnsafeEvalBlockedByCSP);
 
     std::atomic<bool> atomicBoolFlag = false;
 
