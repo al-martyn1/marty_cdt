@@ -40,6 +40,7 @@
 #include <string>
 #include <stdexcept>
 #include <thread>
+#include <type_traits>
 #include <vector>
 #include <variant>
 #include <unordered_map>
@@ -603,8 +604,6 @@ protected:
         throw std::runtime_error(std::string(fnFrom) + ": awaiting ID, but got method: '" + method + "'");
     }
     
-
-
 //--------------------------------------------------------------------------------------------------------------------
 public:
 
@@ -1100,6 +1099,52 @@ public:
                            , RuntimeEvaluateReplMode           replMode = RuntimeEvaluateReplMode::unspecified                     // replMode                         
                            , RuntimeEvaluateCspMode            cspMode = RuntimeEvaluateCspMode::unspecified                       // allowUnsafeEvalBlockedByCSP      
                            );
+
+    // {
+    //   "result": {
+    //     "type": "undefined"
+    //   }
+    // }
+    //  
+    // window.sessionStorage.getItem JSON:
+    // {
+    //   "result": {
+    //     "type": "string",
+    //     "value": "TYRNIYTFTYHJ"
+    //   }
+    // }
+
+    template<typename CheckIterType>
+    bool cdtRuntimeEvaluateGetValueImpl( json                              &jValue
+                                       , const std::string                 &expression
+                                       , CheckIterType                     checkBegin
+                                       , CheckIterType                     checkEnd
+                                       , unsigned                          timeoutMs = 10000
+                                       , RuntimeEvaluateReturnType         returnType = RuntimeEvaluateReturnType::returnByValue               // returnByValue                    
+                                       , const std::string                 &contextId = std::string()                                          // integer as string or empty string
+                                       , const std::string                 &objectGroup = std::string()                                        // object group name string         
+                                       , RuntimeEvaluateAwaitPromise       awaitPromise = RuntimeEvaluateAwaitPromise::unspecified             // awaitPromise                     
+                                       , RuntimeEvaluateUserGesture        userGesture = RuntimeEvaluateUserGesture::unspecified               // userGesture                      
+                                       , RuntimeEvaluateThrowOnSideEffect  throwOnSideEffect = RuntimeEvaluateThrowOnSideEffect::unspecified   // throwOnSideEffect                
+                                       , RuntimeEvaluateBreaksControl      breaksControl = RuntimeEvaluateBreaksControl::unspecified           // disableBreaks                    
+                                       , RuntimeEvaluateReplMode           replMode = RuntimeEvaluateReplMode::unspecified                     // replMode                         
+                                       , RuntimeEvaluateCspMode            cspMode = RuntimeEvaluateCspMode::unspecified                       // allowUnsafeEvalBlockedByCSP      
+                                       );
+
+    bool cdtRuntimeEvaluateGetValue( json                              &jValue
+                                   , const std::string                 &expression
+                                   , const std::string                 &checkType    // empty - don't check type
+                                   , unsigned                          timeoutMs = 10000
+                                   , RuntimeEvaluateReturnType         returnType = RuntimeEvaluateReturnType::returnByValue               // returnByValue                    
+                                   , const std::string                 &contextId = std::string()                                          // integer as string or empty string
+                                   , const std::string                 &objectGroup = std::string()                                        // object group name string         
+                                   , RuntimeEvaluateAwaitPromise       awaitPromise = RuntimeEvaluateAwaitPromise::unspecified             // awaitPromise                     
+                                   , RuntimeEvaluateUserGesture        userGesture = RuntimeEvaluateUserGesture::unspecified               // userGesture                      
+                                   , RuntimeEvaluateThrowOnSideEffect  throwOnSideEffect = RuntimeEvaluateThrowOnSideEffect::unspecified   // throwOnSideEffect                
+                                   , RuntimeEvaluateBreaksControl      breaksControl = RuntimeEvaluateBreaksControl::unspecified           // disableBreaks                    
+                                   , RuntimeEvaluateReplMode           replMode = RuntimeEvaluateReplMode::unspecified                     // replMode                         
+                                   , RuntimeEvaluateCspMode            cspMode = RuntimeEvaluateCspMode::unspecified                       // allowUnsafeEvalBlockedByCSP      
+                                   );
 
     bool cdtGetHtml( std::string         &html
                    , unsigned            timeoutMs = 10000

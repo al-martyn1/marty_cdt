@@ -160,6 +160,7 @@ bool Connection::cdtDomGetDocument( DomDocument &domDocument
 }
 
 //--------------------------------------------------------------------------------------------------------------------
+inline
 bool Connection::cdtRuntimeEvaluate( json                             &jResult
                                    , const std::string                &expression
                                    , unsigned                         timeoutMs
@@ -222,6 +223,92 @@ bool Connection::cdtRuntimeEvaluate( json                             &jResult
 }
 
 //--------------------------------------------------------------------------------------------------------------------
+#if 0
+template<typename CheckIterType>
+inline
+bool Connection::cdtRuntimeEvaluateGetValueImpl( json                              &jValue
+                                               , const std::string                 &expression
+                                               , CheckIterType                     checkBegin
+                                               , CheckIterType                     checkEnd
+                                               , unsigned                          timeoutMs 
+                                               , RuntimeEvaluateReturnType         returnType          // returnByValue                    
+                                               , const std::string                 &contextId          // integer as string or empty string
+                                               , const std::string                 &objectGroup        // object group name string         
+                                               , RuntimeEvaluateAwaitPromise       awaitPromise        // awaitPromise                     
+                                               , RuntimeEvaluateUserGesture        userGesture         // userGesture                      
+                                               , RuntimeEvaluateThrowOnSideEffect  throwOnSideEffect   // throwOnSideEffect                
+                                               , RuntimeEvaluateBreaksControl      breaksControl       // disableBreaks                    
+                                               , RuntimeEvaluateReplMode           replMode            // replMode                         
+                                               , RuntimeEvaluateCspMode            cspMode             // allowUnsafeEvalBlockedByCSP      
+                                               )
+{
+    json jResult;
+    bool bRes = cdtRuntimeEvaluate( jResult
+                                  , expression
+                                  , timeoutMs
+                                  , returnType         
+                                  , contextId          
+                                  , objectGroup        
+                                  , awaitPromise       
+                                  , userGesture        
+                                  , throwOnSideEffect  
+                                  , breaksControl      
+                                  , replMode           
+                                  , cspMode            
+                                  );
+    if (!bRes)
+        return bRes;
+
+    if (!jResult.contains("result"))
+        throw std::runtime_error("no 'result' in reply: " + jResult.dump());
+
+    auto jResultObj = jResult["result"];
+
+    if (checkBegin!=checkEnd)
+    {
+        if (!jResultObj.contains("type"))
+            throw std::runtime_error("no 'result'/'type' in reply: " + jResult.dump());
+    
+        std::string typeStr = jResultObj["type"].get<std::string>();
+
+        for(auto it=checkBegin; it!=checkEnd; ++it)
+        {
+        
+        }
+
+        if (typeStr!="string")
+            throw std::runtime_error("expected 'string' result type, but got '" + typeStr + "'");
+    
+    }
+
+
+
+
+    if (!jResultObj.contains("value"))
+        throw std::runtime_error("no 'result'/'value' in reply: " + jResult.dump());
+
+    html = jResultObj["value"].get<std::string>();
+
+
+    // {
+    //   "result": {
+    //     "type": "undefined"
+    //   }
+    // }
+    //  
+    // window.sessionStorage.getItem JSON:
+    // {
+    //   "result": {
+    //     "type": "string",
+    //     "value": "TYRNIYTFTYHJ"
+    //   }
+    // }
+    
+}
+
+#endif
+//--------------------------------------------------------------------------------------------------------------------
+inline
 bool Connection::cdtGetHtml( std::string        &html
                            , unsigned           timeoutMs
                            , const std::string  &contextId    // integer as string or empty string
@@ -273,7 +360,6 @@ bool Connection::cdtGetHtml( std::string        &html
     return bRes;
 }
 //--------------------------------------------------------------------------------------------------------------------
-
 
 
 
