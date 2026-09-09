@@ -59,6 +59,115 @@ time_point_type getSteadyClockNow()
 
 
 
+//--------------------------------------------------------------------------------------------------------------------
+template<typename IteratorType, typename StringifierType>
+std::string mergeToString(IteratorType b, IteratorType e, std::string sepStr, std::string lastSepStr, StringifierType stringifier)
+{
+    auto size = std::distance(b, e);
+
+    using SizeType = std::decay_t<deltype(size)>;
+
+    if (size==0)
+        return std::string();
+
+    if (size==1)
+        return stringifier(*b);
+
+    if (sepStr.empty())
+        sepStr = ", ";
+    else if (sepStr.back()!=' ')
+        sepStr.append(1, ' ');
+
+    if (lastSepStr.empty())
+        lastSepStr = sepStr;
+    else
+    {
+        if (lastSepStr.front()!=' ')
+            lastSepStr = ' ' + lastSepStr;
+        if (lastSepStr.back()!=' ')
+            lastSepStr.append(1, ' ');
+    }
+
+    std::string resStr;
+
+    SizeType nLast = size-1;
+    SizeType i = 0;
+
+    for(; b!=e; ++b, ++i)
+    {
+        if (!i)
+        {
+            resStr = stringifier(*b);
+        }
+        else
+        {
+            if (i>=nLast)
+                resStr.append(lastSepStr);
+            else
+                resStr.append(sepStr);
+
+            resStr.append(stringifier(*b));
+        }
+    }
+
+    return resStr;
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------
+inline
+char digit2hex(unsigned d, bool bUpper=true)
+{
+    if (d<10)
+        return char('0' + d);
+    return char((bUpper?'A':'a') + d-10);
+}
+
+inline
+std::string toHexString(std::uint8_t b, bool bUpper=true)
+{
+    std::string resStr;
+    resStr.append(1,digit2hex(unsigned(b>>4)&0x0Fu, bUpper));
+    resStr.append(1,digit2hex(unsigned(b   )&0x0Fu, bUpper));
+    return resStr;
+}
+
+inline
+std::string toHexString(std::uint16_t w, bool bUpper=true)
+{
+    return toHexString(std::uint8_t(w>>8), bUpper) + toHexString(std::uint8_t(w), bUpper);
+}
+
+inline
+std::string toHexString(std::uint32_t dw, bool bUpper=true)
+{
+    return toHexString(std::uint16_t(dw>>16), bUpper) + toHexString(std::uint16_t(dw), bUpper);
+}
+
+inline
+std::string toHexString(std::uint64_t qw, bool bUpper=true)
+{
+    return toHexString(std::uint32_t(qw>>32), bUpper) + toHexString(std::uint32_t(qw), bUpper);
+}
+
+inline
+std::string toHexString(const std::vector<std::uint8_t> &v, bool bUpper=true)
+{
+    std::string resStr;
+
+    for(auto b: v)
+    {
+        if (!resStr.empty())
+            resStr.append(1, ' ');
+        resStr.append(toHexString(b, bUpper));
+    }
+
+    return resStr;
+}
+
 //----------------------------------------------------------------------------
 inline
 std::string toHexDump(std::size_t w, const std::uint8_t *pData, std::size_t dataSz, const std::string &breakLine="\n", bool bUpper=true, char fillCh=' ')
@@ -265,6 +374,7 @@ inline
 std::vector<std::string> generateArgsForSpawnChromeExactDirs( const std::string &userDataDir
                                                             , const std::string &diskCacheDir
                                                             , int port
+                                                            , bool restoreLastSession=false // в настройках не должно быть настроено восстановление, так как мы можем принудительно восстановить, но принудительно отключить восстановление не получится
                                                             )
 {
     std::vector<std::string> argsVec;
@@ -276,6 +386,9 @@ std::vector<std::string> generateArgsForSpawnChromeExactDirs( const std::string 
     argsVec.push_back("--remote-allow-origins=http" + schemeSepLocalhostPort + ",ws" + schemeSepLocalhostPort + ",wss" + schemeSepLocalhostPort);
     argsVec.push_back("--user-data-dir="  + userDataDir);
     argsVec.push_back("--disk-cache-dir=" + diskCacheDir);
+    if (restoreLastSession)
+        argsVec.push_back("--restore-last-session");
+
     //argsVec.push_back("" + );
 
     return argsVec;
