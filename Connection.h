@@ -134,7 +134,7 @@ public:
         return response;
     }
 
-    ix::HttpResponsePtr checkRunAndGetJsonList( std::vector<JsonListResponseEntry> &list
+    ix::HttpResponsePtr checkRunAndGetJsonList( json                               &jResult
                                               , const std::string                  &chromeName  // "chrome"
                                               , const std::vector<std::string>     &spawnArgs
                                               , Timeouts                           probeTimeouts
@@ -146,9 +146,25 @@ public:
     
         if (!response->body.empty())
         {
-            auto j = json::parse(response->body);
-            from_json(j, list);
+            jResult = json::parse(response->body);
         }
+
+        return response;
+    }
+
+    ix::HttpResponsePtr checkRunAndGetJsonList( std::vector<JsonListResponseEntry> &list
+                                              , const std::string                  &chromeName  // "chrome"
+                                              , const std::vector<std::string>     &spawnArgs
+                                              , Timeouts                           probeTimeouts
+                                              ) const
+    {
+        json jResult;
+
+        auto response = checkRunAndGetJsonList(jResult, chromeName, spawnArgs, probeTimeouts);
+        if (!utils::ixHttpErrorCodeIsOk(response->errorCode))
+            return response;
+    
+        from_json(jResult, list);
 
         return response;
     }
@@ -634,6 +650,19 @@ public:
             m_systemHandlers[t] = handler;
     }
 
+    void wsSetSystemEventHandler(SystemEventHandlerType handler)
+    {
+        wsSetSystemEventHandler( { ix::WebSocketMessageType::Open
+                                 , ix::WebSocketMessageType::Close
+                                 , ix::WebSocketMessageType::Error
+                                 , ix::WebSocketMessageType::Ping
+                                 , ix::WebSocketMessageType::Pong
+                                 , ix::WebSocketMessageType::Fragment
+                                 }
+                               , handler
+                               );
+    }
+
 
     //--------------------------------------------------
     void wsPushMethodEventHandlers()
@@ -907,6 +936,11 @@ public:
         return false;
     }
 
+    void wsSleepAndDispatchMessages(unsigned timeoutMs)
+    {
+        wsWaitAndDispatchMessages( timeoutMs, [&]() -> bool { return false; } );
+    }
+
 
     //--------------------------------------------------
     ix::WebSocketSendInfo wsSendEventSubscription(const std::string &eventName, bool enableSubscription=true)
@@ -1067,6 +1101,11 @@ public:
                            , RuntimeEvaluateCspMode            cspMode = RuntimeEvaluateCspMode::unspecified                       // allowUnsafeEvalBlockedByCSP      
                            );
 
+    bool cdtGetHtml( std::string         &html
+                   , unsigned            timeoutMs = 10000
+                   , const std::string   &contextId = std::string()    // integer as string or empty string
+                   , const std::string   &objectGroup = std::string()  // object group name string         
+                   );
 
 }; // class Connection
 

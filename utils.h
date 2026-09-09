@@ -59,6 +59,57 @@ time_point_type getSteadyClockNow()
 
 
 
+//----------------------------------------------------------------------------
+inline
+std::string toHexDump(std::size_t w, const std::uint8_t *pData, std::size_t dataSz, const std::string &breakLine="\n", bool bUpper=true, char fillCh=' ')
+{
+    std::string resStr; resStr.reserve(dataSz*3u);
+
+    std::size_t i=0;
+    for(; i!=dataSz; ++i)
+    {
+        if ((i%w)==0 && i!=0)
+        {
+            // out << " // 0x" << utils::toHexString(std::uint16_t(i-16)) << " / " << i-16;
+        }
+        resStr.append(((i%w)==0 ? breakLine : std::string(1, fillCh)));
+        // out << ((i%16)==0 ? "\n" : "");
+        // //out << (i==0 ? "{ " : ", ");
+        // out << "0x" << utils::toHexString(metadata[i]); // cli::utils::numswr((unsigned)metadata[i], 3);
+        resStr.append(toHexString(pData[i], bUpper));
+
+    }
+
+    resStr.append(((i%w)==0 ? breakLine : std::string(0, fillCh)));
+    //out << ((i%16)==0 ? "\n" : "");
+
+    return resStr;
+}
+
+//----------------------------------------------------------------------------
+inline
+std::string toHexDump(std::size_t w, const std::vector<std::uint8_t> &data, const std::string &breakLine="\n", bool bUpper=true, char fillCh=' ')
+{
+    if (data.empty())
+        return std::string();
+
+    return toHexDump(w, &data[0], data.size(), breakLine, bUpper, fillCh);
+}
+
+//----------------------------------------------------------------------------
+inline
+std::string toHexDump(std::size_t w, const std::string &data, const std::string &breakLine="\n", bool bUpper=true, char fillCh=' ')
+{
+    if (data.empty())
+        return std::string();
+
+    return toHexDump(w, (const std::uint8_t*)data.data(), data.size(), breakLine, bUpper, fillCh);
+}
+
+//----------------------------------------------------------------------------
+
+
+
 //--------------------------------------------------------------------------------------------------------------------
 inline
 std::vector<std::string> generatePatterns(const std::string& input, char delimiter = '.')

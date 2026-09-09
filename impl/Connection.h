@@ -222,6 +222,57 @@ bool Connection::cdtRuntimeEvaluate( json                             &jResult
 }
 
 //--------------------------------------------------------------------------------------------------------------------
+bool Connection::cdtGetHtml( std::string        &html
+                           , unsigned           timeoutMs
+                           , const std::string  &contextId    // integer as string or empty string
+                           , const std::string  &objectGroup  // object group name string         
+                           )
+{
+    json jResult;
+    bool bRes = cdtRuntimeEvaluate( jResult, "document.documentElement.outerHTML"
+                                  , timeoutMs
+                                  , RuntimeEvaluateReturnType::returnByValue
+                                  , contextId
+                                  , objectGroup
+                                  );
+    if (!bRes)
+        return bRes;
+
+    // Good response
+    // {
+    //   "result": {
+    //     "type": "string",
+    //     "value": "<html lang=\"ru\" >...</html>"
+    //   }
+    // }
+    
+    // Bad response
+    // {
+    //   "result": {
+    //     "type": "undefined"
+    //   }
+    // }
+
+    if (!jResult.contains("result"))
+        throw std::runtime_error("no 'result' in reply: " + jResult.dump());
+
+    auto jResultObj = jResult["result"];
+
+    if (!jResultObj.contains("type"))
+        throw std::runtime_error("no 'result'/'type' in reply: " + jResult.dump());
+
+    std::string typeStr = jResultObj["type"].get<std::string>();
+    if (typeStr!="string")
+        throw std::runtime_error("expected 'string' result type, but got '" + typeStr + "'");
+
+    if (!jResultObj.contains("value"))
+        throw std::runtime_error("no 'result'/'value' in reply: " + jResult.dump());
+
+    html = jResultObj["value"].get<std::string>();
+
+    return bRes;
+}
+//--------------------------------------------------------------------------------------------------------------------
 
 
 
