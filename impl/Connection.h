@@ -223,7 +223,7 @@ bool Connection::cdtRuntimeEvaluate( json                             &jResult
 }
 
 //--------------------------------------------------------------------------------------------------------------------
-#if 0
+#if 1
 template<typename CheckIterType>
 inline
 bool Connection::cdtRuntimeEvaluateGetValueImpl( json                              &jValue
@@ -264,23 +264,35 @@ bool Connection::cdtRuntimeEvaluateGetValueImpl( json                           
 
     auto jResultObj = jResult["result"];
 
-    if (checkBegin!=checkEnd)
+    if (checkBegin!=checkEnd) // Есть значения для проверки типа
     {
         if (!jResultObj.contains("type"))
             throw std::runtime_error("no 'result'/'type' in reply: " + jResult.dump());
     
         std::string typeStr = jResultObj["type"].get<std::string>();
 
+        bool bTypeFound = false;
         for(auto it=checkBegin; it!=checkEnd; ++it)
         {
-        
+            if (typeStr==*it)
+            {
+                bTypeFound = true;
+                break;
+            }
         }
+
+        if (!bTypeFound)
+            throw std::runtime_error("expected " + utils::mergeValsToString(checkBegin, checkEnd, ",", "or", "\'") + " result type, but got '" + typeStr + "'");
+    }
+
 
         if (typeStr!="string")
             throw std::runtime_error("expected 'string' result type, but got '" + typeStr + "'");
     
-    }
 
+        // std::vector<std::string> values = {"string", "number", "boolean", "object"};
+        // std::string merged = marty::cdt::utils::mergeValsToString(values.begin(), values.end(), ",", "or", [](auto s) { return '\'' + s + '\''; });
+        // cout << "Merged values: " << merged << "\n";
 
 
 
