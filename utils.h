@@ -61,11 +61,11 @@ time_point_type getSteadyClockNow()
 
 //--------------------------------------------------------------------------------------------------------------------
 template<typename IteratorType, typename StringifierType>
-std::string mergeToString(IteratorType b, IteratorType e, std::string sepStr, std::string lastSepStr, StringifierType stringifier)
+std::string mergeValsToString(IteratorType b, IteratorType e, std::string sepStr, std::string lastSepStr, StringifierType stringifier)
 {
     auto size = std::distance(b, e);
 
-    using SizeType = std::decay_t<deltype(size)>;
+    using SizeType = std::decay_t<decltype(size)>;
 
     if (size==0)
         return std::string();
@@ -113,6 +113,12 @@ std::string mergeToString(IteratorType b, IteratorType e, std::string sepStr, st
     return resStr;
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+template<typename IteratorType>
+std::string mergeValsToString(IteratorType b, IteratorType e, std::string sepStr=",", std::string lastSepStr="or", const std::string quotStr="\'")
+{
+    return mergeValsToString(b, e, sepStr, lastSepStr, [&](auto s) { return quotStr + s + quotStr; });
+}
 //--------------------------------------------------------------------------------------------------------------------
 
 
