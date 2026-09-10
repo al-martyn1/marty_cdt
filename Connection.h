@@ -1131,20 +1131,65 @@ public:
                                        , RuntimeEvaluateCspMode            cspMode = RuntimeEvaluateCspMode::unspecified                       // allowUnsafeEvalBlockedByCSP      
                                        );
 
-    bool cdtRuntimeEvaluateGetValue( json                              &jValue
-                                   , const std::string                 &expression
-                                   , const std::string                 &checkType    // empty - don't check type
-                                   , unsigned                          timeoutMs = 10000
-                                   , RuntimeEvaluateReturnType         returnType = RuntimeEvaluateReturnType::returnByValue               // returnByValue                    
-                                   , const std::string                 &contextId = std::string()                                          // integer as string or empty string
-                                   , const std::string                 &objectGroup = std::string()                                        // object group name string         
-                                   , RuntimeEvaluateAwaitPromise       awaitPromise = RuntimeEvaluateAwaitPromise::unspecified             // awaitPromise                     
-                                   , RuntimeEvaluateUserGesture        userGesture = RuntimeEvaluateUserGesture::unspecified               // userGesture                      
-                                   , RuntimeEvaluateThrowOnSideEffect  throwOnSideEffect = RuntimeEvaluateThrowOnSideEffect::unspecified   // throwOnSideEffect                
-                                   , RuntimeEvaluateBreaksControl      breaksControl = RuntimeEvaluateBreaksControl::unspecified           // disableBreaks                    
-                                   , RuntimeEvaluateReplMode           replMode = RuntimeEvaluateReplMode::unspecified                     // replMode                         
-                                   , RuntimeEvaluateCspMode            cspMode = RuntimeEvaluateCspMode::unspecified                       // allowUnsafeEvalBlockedByCSP      
-                                   );
+    bool cdtRuntimeEvaluateGetValue( json                                      &jValue
+                                   , const std::string                         &expression
+                                   , const std::vector<std::string>            &checkTypes    // empty - don't check type
+                                   , unsigned                                  timeoutMs = 10000
+                                   , RuntimeEvaluateReturnType                 returnType = RuntimeEvaluateReturnType::returnByValue               // returnByValue                    
+                                   , const std::string                         &contextId = std::string()                                          // integer as string or empty string
+                                   , const std::string                         &objectGroup = std::string()                                        // object group name string         
+                                   , RuntimeEvaluateAwaitPromise               awaitPromise = RuntimeEvaluateAwaitPromise::unspecified             // awaitPromise                     
+                                   , RuntimeEvaluateUserGesture                userGesture = RuntimeEvaluateUserGesture::unspecified               // userGesture                      
+                                   , RuntimeEvaluateThrowOnSideEffect          throwOnSideEffect = RuntimeEvaluateThrowOnSideEffect::unspecified   // throwOnSideEffect                
+                                   , RuntimeEvaluateBreaksControl              breaksControl = RuntimeEvaluateBreaksControl::unspecified           // disableBreaks                    
+                                   , RuntimeEvaluateReplMode                   replMode = RuntimeEvaluateReplMode::unspecified                     // replMode                         
+                                   , RuntimeEvaluateCspMode                    cspMode = RuntimeEvaluateCspMode::unspecified                       // allowUnsafeEvalBlockedByCSP      
+                                   )
+    {
+        return cdtRuntimeEvaluateGetValueImpl( jValue, expression, checkTypes.begin(), checkTypes.end(), timeoutMs, returnType, contextId, objectGroup
+                                             , awaitPromise, userGesture, throwOnSideEffect, breaksControl, replMode, cspMode
+                                             );
+    }
+
+    bool cdtRuntimeEvaluateGetValue( json                                      &jValue
+                                   , const std::string                         &expression
+                                   , const std::initializer_list<std::string>  &checkTypes    // empty - don't check type
+                                   , unsigned                                  timeoutMs = 10000
+                                   , RuntimeEvaluateReturnType                 returnType = RuntimeEvaluateReturnType::returnByValue               // returnByValue                    
+                                   , const std::string                         &contextId = std::string()                                          // integer as string or empty string
+                                   , const std::string                         &objectGroup = std::string()                                        // object group name string         
+                                   , RuntimeEvaluateAwaitPromise               awaitPromise = RuntimeEvaluateAwaitPromise::unspecified             // awaitPromise                     
+                                   , RuntimeEvaluateUserGesture                userGesture = RuntimeEvaluateUserGesture::unspecified               // userGesture                      
+                                   , RuntimeEvaluateThrowOnSideEffect          throwOnSideEffect = RuntimeEvaluateThrowOnSideEffect::unspecified   // throwOnSideEffect                
+                                   , RuntimeEvaluateBreaksControl              breaksControl = RuntimeEvaluateBreaksControl::unspecified           // disableBreaks                    
+                                   , RuntimeEvaluateReplMode                   replMode = RuntimeEvaluateReplMode::unspecified                     // replMode                         
+                                   , RuntimeEvaluateCspMode                    cspMode = RuntimeEvaluateCspMode::unspecified                       // allowUnsafeEvalBlockedByCSP      
+                                   )
+    {
+        return cdtRuntimeEvaluateGetValueImpl( jValue, expression, checkTypes.begin(), checkTypes.end(), timeoutMs, returnType, contextId, objectGroup
+                                             , awaitPromise, userGesture, throwOnSideEffect, breaksControl, replMode, cspMode
+                                             );
+    }
+
+    bool cdtRuntimeEvaluateGetValue( json                                      &jValue
+                                   , const std::string                         &expression
+                                   , const std::string                         &checkType    // empty - don't check type
+                                   , unsigned                                  timeoutMs = 10000
+                                   , RuntimeEvaluateReturnType                 returnType = RuntimeEvaluateReturnType::returnByValue               // returnByValue                    
+                                   , const std::string                         &contextId = std::string()                                          // integer as string or empty string
+                                   , const std::string                         &objectGroup = std::string()                                        // object group name string         
+                                   , RuntimeEvaluateAwaitPromise               awaitPromise = RuntimeEvaluateAwaitPromise::unspecified             // awaitPromise                     
+                                   , RuntimeEvaluateUserGesture                userGesture = RuntimeEvaluateUserGesture::unspecified               // userGesture                      
+                                   , RuntimeEvaluateThrowOnSideEffect          throwOnSideEffect = RuntimeEvaluateThrowOnSideEffect::unspecified   // throwOnSideEffect                
+                                   , RuntimeEvaluateBreaksControl              breaksControl = RuntimeEvaluateBreaksControl::unspecified           // disableBreaks                    
+                                   , RuntimeEvaluateReplMode                   replMode = RuntimeEvaluateReplMode::unspecified                     // replMode                         
+                                   , RuntimeEvaluateCspMode                    cspMode = RuntimeEvaluateCspMode::unspecified                       // allowUnsafeEvalBlockedByCSP      
+                                   )
+    {
+        return cdtRuntimeEvaluateGetValue( jValue, expression,  /* std::initializer_list */ {checkType}, timeoutMs, returnType, contextId, objectGroup
+                                         , awaitPromise, userGesture, throwOnSideEffect, breaksControl, replMode, cspMode
+                                         );
+    }
 
     bool cdtGetHtml( std::string         &html
                    , unsigned            timeoutMs = 10000
