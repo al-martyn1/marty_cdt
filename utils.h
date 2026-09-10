@@ -119,6 +119,14 @@ std::string mergeValsToString(IteratorType b, IteratorType e, std::string sepStr
 {
     return mergeValsToString(b, e, sepStr, lastSepStr, [&](auto s) { return quotStr + s + quotStr; });
 }
+
+//--------------------------------------------------------------------------------------------------------------------
+template<typename IteratorType>
+std::string mergeValsToString(IteratorType b, IteratorType e, std::string sepStr, std::string lastSepStr, const char* quotStr)
+{
+    return mergeValsToString(b, e, sepStr, lastSepStr, std::string(quotStr));
+}
+
 //--------------------------------------------------------------------------------------------------------------------
 
 
